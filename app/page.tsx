@@ -1,5 +1,5 @@
 import { AppContext } from "@/components/common"
-import { ProblemLayout, RadialChart, ScoreCard } from "@/components/main"
+import { ProblemLayout, RadialChart, ScoreCard, SolutionLayout } from "@/components/main"
 import { Badge, Card, Separator } from "@/components/ui"
 import { ArrowRight, Check, ChevronRight, CircleAlert, TrendingUp } from "lucide-react"
 
@@ -16,7 +16,7 @@ function Home() {
                     <div>
                         <div className="flex items-center gap-1">
                             <span className="text-[10px] text-neutral-400">프로젝트 워크스페이스</span>
-                            <ChevronRight className="w-4 text-neutral-400" /> 
+                            <ChevronRight className="w-4 text-neutral-400" />
                             <span className="text-[10px] text-violet-400">PSST 프레임워크 구조화 진단</span>
                         </div>
                         <h1 className="text-2xl font-bold">
@@ -106,7 +106,10 @@ function Home() {
                     </div>
                     <div className="flex w-full gap-4">
                         {/* 문제인식 - 솔루션 - 성장전략 - 팀 빌딩 선택 후 보이는 콘텐츠 영역 */}
-                        <ProblemLayout />
+                        <div className="flex w-3/5 flex-col gap-4">
+                            <ProblemLayout />
+                            <SolutionLayout />
+                        </div>
                         {/* AI 분석 레포트 영역 */}
                         <Card className="w-2/5 gap-4 p-4">
                             <div className="flex flex-col gap-2">

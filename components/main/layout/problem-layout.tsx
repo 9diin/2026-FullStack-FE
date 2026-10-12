@@ -3,7 +3,7 @@ import { Bot, ChevronRight, CircleArrowRight, CornerDownRight } from "lucide-rea
 
 function ProblemLayout() {
     return (
-        <Card className="h-fit w-3/5 gap-4 p-4">
+        <Card className="h-fit w-full gap-4 p-4">
             <div>
                 <div className="flex items-start justify-between">
                     <h2 className="text-xl font-semibold">1. 문제인식 (Problem)</h2>
