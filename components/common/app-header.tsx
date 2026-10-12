@@ -4,6 +4,8 @@ import Image from "next/image"
 import { Comic_Neue } from "next/font/google"
 import { usePathname, useRouter } from "next/navigation"
 import { Tabs, TabsList, TabsTrigger, Button } from "../ui"
+import { useAuthStore } from "@/store/auth"
+import { AppUser } from "./app-user"
 
 const comicNeue = Comic_Neue({
     weight: "400",
@@ -13,6 +15,7 @@ const comicNeue = Comic_Neue({
 
 function AppHeader() {
     const router = useRouter()
+    const user = useAuthStore((state) => state.user)
     // Next.js의 usePathname 훅은 현재 사용자가 위치한 경로(Pathname)의 URL 주소를 문자열로 가져오는 클라이언트 컴포넌트 전용 훅입니다.
     const pathname = usePathname() // => 현재 사용자가 위치한 경로(Pathname)의 URL 주소를 문자열로 가져옵니다.
     // 예를 들어, 사용자가 "/sign-in" 페이지에 있다면 pathname은 "/sign-in"이 되고, 메인 페이지에 있다면 "/"이 됩니다.
@@ -42,15 +45,19 @@ function AppHeader() {
                         </TabsList>
                     </Tabs>
                     {/* 버튼 영역 */}
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline">
-                            <Image src="/icons/ai.svg" alt="@ICON" width={20} height={20} />
-                            AI 연결
-                        </Button>
-                        <Button className="bg-linear-to-br from-blue-600 via-purple-500 to-pink-500 text-white" onClick={() => router.push("/sign-in")}>
-                            로그인
-                        </Button>
-                    </div>
+                    {user ? (
+                        <AppUser user={user} />
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline">
+                                <Image src="/icons/ai.svg" alt="@ICON" width={20} height={20} />
+                                AI 연결
+                            </Button>
+                            <Button className="bg-linear-to-br from-blue-600 via-purple-500 to-pink-500 text-white" onClick={() => router.push("/sign-in")}>
+                                로그인
+                            </Button>
+                        </div>
+                    )}
                 </div>
             )}
         </header>

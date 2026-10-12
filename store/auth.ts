@@ -1,8 +1,11 @@
 import { create } from "zustand"
+import { persist } from "zustand/middleware"
 
 interface User {
     id: number
     email: string
+    name:string
+    avatar: string
 }
 
 // 1. 타입 정의 부분 분석
@@ -59,8 +62,17 @@ interface AuthStore {
 // 만약 스토어에 user 외에도 isLoggedIn, token 등 수많은 상태가 같이 들어있다고 상상해 보세요.
 // set({ user: newUser })라고 쓰면, Zustand는 "다른 건 다 그대로 두고, 객체 안의 user 속성만 새로운 newUser로 갈아 끼워야겠구나!" 하고 이해합니다.
 // 즉, Zustand 스토어는 항상 객체 형태로 상태를 관리하기 때문에, 상태를 바꿀 때도 "바꾸고 싶은 모양의 객체 조각"을 set 함수 안에 넣어주는 것입니다.
-export const useAuthStore = create<AuthStore>((set) => ({
-    user: null,
-    setUser: (user) => set({ user }),
-    clearAuth: () => set({ user: null }),
-}))
+export const useAuthStore = create<AuthStore>()(
+    persist(
+        (set) => ({
+            user: null, 
+            setUser: (user) => set({ user }),
+            clearAuth: () => set({ user: null }),
+        }),
+        {
+            name: "auth-storage",
+            partialize: (state) => ({ user: state.user }),
+            skipHydration: true,
+        },
+    ),
+)

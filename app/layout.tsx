@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { AppHeader } from "@/components/common"
 import { Toaster } from "@/components/ui/toast"
+import { AuthStoreHydration } from "@/components/auth/auth-store-hydration"
 
 const paperlogy = localFont({
     src: [
@@ -30,6 +31,7 @@ export default function RootLayout({
         <html lang="ko" suppressHydrationWarning className={cn(paperlogy.variable, "antialiased", "font-sans")}>
             <body>
                 <ThemeProvider defaultTheme="dark">
+                    <AuthStoreHydration />
                     <div className="flex min-h-screen flex-col gap-2 p-4 pt-2">
                         <AppHeader />
                         <main className="h-[calc(100vh-4rem)] w-full">{children}</main>

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useState, type SubmitEvent } from "react"
-import { useAuthStore } from "@/store/useAuthStore"
+import { useAuthStore } from "@/store/auth"
 
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Field, FieldDescription, FieldGroup, FieldLabel, Input } from "@/components/ui"
 import { signIn } from "@/api/auth"
@@ -92,7 +92,7 @@ function SignInForm() {
                 // 브라우저 UI 동기화(예: 유저 이름 표시)를 위해 필요한 유저 정보만 Zustand 스토어에 반영합니다.
                 // setUser(res.data.user)
 
-                const { access_token, user } = res.data // 백엔드가 넘겨준 토큰과 유저 정보 구조라 가정
+                const { access_token, user } = res // 백엔드가 넘겨준 토큰과 유저 정보 구조라 가정
                 // [보안/미들웨어용] 토큰을 쿠키에 저장
                 // 만약 백엔드가 쿠키를 자동으로 심어주지 않는다면, 프론트엔드에서 아래와 같이 쿠키에 저장합니다.
                 // (실무에서는 백엔드가 Set-Cookie로 HttpOnly 쿠키를 내려주는 것이 가장 안전합니다.)
@@ -102,7 +102,7 @@ function SignInForm() {
                 // Cookies.set("access_token", access_token, { expires: 1, secure: true, sameSite: "strict" })
 
                 // 2. [UI 동기화용] 유저 정보를 Zustand 스토어에 저장
-                setUser(user)
+                setUser(user) 
 
                 toast.add({
                     title: res.message || "로그인에 성공했습니다.",
