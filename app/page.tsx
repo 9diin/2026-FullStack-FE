@@ -108,7 +108,15 @@ function Home() {
                         {/* 문제인식 - 솔루션 - 성장전략 - 팀 빌딩 선택 후 보이는 콘텐츠 영역 */}
                         <div className="flex w-3/5 flex-col gap-4">
                             <ProblemLayout />
+                            <div className="flex flex-col gap-1">
+                                <Separator />
+                                <Separator />
+                            </div>
                             <SolutionLayout />
+                            <div className="flex flex-col gap-1">
+                                <Separator />
+                                <Separator />
+                            </div>
                         </div>
                         {/* AI 분석 레포트 영역 */}
                         <Card className="w-2/5 gap-4 p-4">
@@ -124,10 +132,10 @@ function Home() {
                             <div className="flex flex-col gap-2">
                                 <span className="font-semibold">PSST 4대 영역별 배점 스코어카드</span>
                                 <div className="flex flex-col gap-2 pb-4">
-                                    <ScoreCard title="문제인식 (내재적 관점 & 외재적 관점)" score="81" />
-                                    <ScoreCard title="실현방안 (기술 구체성 및 MVP)" score="81" />
-                                    <ScoreCard title="시장성 (수익성 & 확장성)" score="81" />
-                                    <ScoreCard title="팀 구성 (기술 개발 역량)" score="81" />
+                                    <ScoreCard title="문제인식 (내재적 관점 & 외재적 관점)" score="81" categoryCode="P" />
+                                    <ScoreCard title="실현방안 (기술 구체성 및 MVP)" score="81" categoryCode="S" />
+                                    <ScoreCard title="시장성 (수익성 & 확장성)" score="81" categoryCode="S" />
+                                    <ScoreCard title="팀 구성 (기술 개발 역량)" score="81" categoryCode="T" />
                                 </div>
                             </div>
                         </Card>
