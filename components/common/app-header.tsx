@@ -25,7 +25,8 @@ function AppHeader() {
     // 특정 레이아웃(예: 상단 내비게이션 바 등)을 숨기거나 다르게 보여줄 때 주로 사용됩니다.
     // 상단에 "use client"가 선언되어 있어야만 정상적으로 동작합니다.
     // Next.js의 App Router 환경에서 클라이언트 측 라우팅 변화를 실시간으로 감지할 수 있습니다.
-    const isAuthPage = pathname === "/sign-in" || pathname === "/sign-up"
+    const isAuthPage = pathname === "/sign-in" || pathname === "/sign-up" || pathname === "/me"
+    // const isMyPage = pathname.startsWith("/me")
 
     return (
         <header className="flex min-h-8 w-full">
