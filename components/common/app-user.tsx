@@ -1,6 +1,6 @@
 "use client"
 
-import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react"
+import { BadgeCheck, LogOut } from "lucide-react"
 
 import {
     Avatar,
@@ -26,7 +26,7 @@ export function AppUser({
 }) {
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className="flex w-fit cursor-pointer items-center gap-2 rounded-lg p-2 text-left">
+            <DropdownMenuTrigger className="flex w-fit cursor-pointer items-center gap-2 rounded-lg text-left">
                 <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={user.avatar} alt={user.name} />
                     <AvatarFallback className="rounded-lg">AP</AvatarFallback>

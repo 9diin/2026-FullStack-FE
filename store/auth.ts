@@ -4,7 +4,7 @@ import { persist } from "zustand/middleware"
 interface User {
     id: number
     email: string
-    name:string
+    name: string
     avatar: string
 }
 
@@ -65,7 +65,7 @@ interface AuthStore {
 export const useAuthStore = create<AuthStore>()(
     persist(
         (set) => ({
-            user: null, 
+            user: null,
             setUser: (user) => set({ user }),
             clearAuth: () => set({ user: null }),
         }),
@@ -73,6 +73,6 @@ export const useAuthStore = create<AuthStore>()(
             name: "auth-storage",
             partialize: (state) => ({ user: state.user }),
             skipHydration: true,
-        },
-    ),
+        }
+    )
 )
