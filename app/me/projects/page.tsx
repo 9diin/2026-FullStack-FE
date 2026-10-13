@@ -1,19 +1,5 @@
 import { AppPagination } from "@/components/common"
-import {
-    Badge,
-    Button,
-    Card,
-    Skeleton,
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-    Input,
-    Separator,
-} from "@/components/ui"
+import { Badge, Button, Card, Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, Input, Separator } from "@/components/ui"
 import { Download, FolderBookmark, PencilLine, Plus, Search, Trash2 } from "lucide-react"
 
 const items1 = [
@@ -34,13 +20,12 @@ const items2 = [
     { label: "Pineapple", value: "pineapple" },
 ]
 
-function Me() {
+function Projects() {
     return (
-        <div className="flex h-full w-full gap-2">
-            <Skeleton className="h-full w-72 min-w-72" />
-            <div className="flex h-full w-[calc(100%-288px)] max-w-7xl flex-col gap-6 p-4 pt-0">
+        <div className="flex flex-1 items-start justify-center">
+            <div className="flex h-full min-h-0 w-[calc(100%-288px)] max-w-7xl flex-col gap-6 p-4 pt-0">
                 {/* 헤더 영역 - 52px */}
-                <div className="flex w-full justify-between">
+                <div className="flex w-full shrink-0 justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold">내 프로젝트 & 문서 보관함</h1>
                         <p className="text-neutral-400">인공지능이 구조화된 사업계획서, 린 캔버스 및 피치덱 데이터를 실시간 관리합니다.</p>
@@ -51,9 +36,9 @@ function Me() {
                     </Button>
                 </div>
                 {/* 메인 콘텐츠 영역 */}
-                <div className="flex h-[calc(100%-52px)] w-full flex-col gap-6">
+                <div className="flex min-h-0 w-full flex-1 flex-col gap-6">
                     {/* 136px */}
-                    <div className="flex w-full flex-col gap-2">
+                    <div className="flex w-full shrink-0 flex-col gap-2">
                         <div className="flex w-full justify-between">
                             <span>주요 프로젝트 폴더</span>
                             <Button variant="link" className="h-fit p-0">
@@ -108,12 +93,12 @@ function Me() {
                             </Card>
                         </div>
                     </div>
-                    <div className="flex flex-col gap-1">
+                    <div className="flex shrink-0 flex-col gap-1">
                         <Separator />
                         <Separator />
                     </div>
-                    <div className="flex h-[calc(100%-136px)] w-full flex-col justify-between gap-4">
-                        <div className="flex items-center gap-2">
+                    <div className="flex min-h-0 w-full flex-1 flex-col gap-4">
+                        <div className="flex shrink-0 items-center gap-2">
                             <Input placeholder="검색어를 입력하세요" className="w-72" />
                             <Select items={items2}>
                                 <SelectTrigger className="w-full max-w-24">
@@ -150,15 +135,15 @@ function Me() {
                             </Button>
                         </div>
                         {/* 테이블 영역 */}
-                        <div className="flex w-full flex-col gap-2 rounded-md border">
-                            <div className="flex h-10 min-h-10 w-full items-center border-b">
+                        <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto rounded-md border">
+                            <div className="flex h-10 min-h-10 w-full shrink-0 items-center border-b">
                                 <div className="flex w-[42.5%] items-center justify-center">프로젝트 / 파일명</div>
                                 <div className="flex w-[15%] items-center justify-center">최종 수정일</div>
                                 <div className="flex w-[15%] items-center justify-center">소속 분류</div>
                                 <div className="flex w-[10%] items-center justify-center">태그</div>
                                 <div className="flex w-[17.5%] items-center justify-center">작업 관리</div>
                             </div>
-                            <div className="flex h-10 min-h-10 w-full items-center bg-card">
+                            <div className="flex h-10 min-h-10 w-full shrink-0 items-center border-b bg-card">
                                 <div className="flex w-[42.5%] items-center justify-center"> B2B 물류 최적화 SaaS 아이디어 린 캔버스 & 가치제안서</div>
                                 <div className="flex w-[15%] items-center justify-center">2026년 10월 13일</div>
                                 <div className="flex w-[15%] items-center justify-center">아이디어 인큐베이팅</div>
@@ -177,7 +162,7 @@ function Me() {
                                     </Button>
                                 </div>
                             </div>
-                            <div className="flex h-10 min-h-10 w-full items-center bg-card">
+                            <div className="flex h-10 min-h-10 w-full shrink-0 items-center border-b bg-card">
                                 <div className="flex w-[42.5%] items-center justify-center"> B2B 물류 최적화 SaaS 아이디어 린 캔버스 & 가치제안서</div>
                                 <div className="flex w-[15%] items-center justify-center">2026년 10월 13일</div>
                                 <div className="flex w-[15%] items-center justify-center">아이디어 인큐베이팅</div>
@@ -196,7 +181,7 @@ function Me() {
                                     </Button>
                                 </div>
                             </div>
-                            <div className="flex h-10 min-h-10 w-full items-center bg-card">
+                            <div className="flex h-10 min-h-10 w-full shrink-0 items-center border-b bg-card">
                                 <div className="flex w-[42.5%] items-center justify-center"> B2B 물류 최적화 SaaS 아이디어 린 캔버스 & 가치제안서</div>
                                 <div className="flex w-[15%] items-center justify-center">2026년 10월 13일</div>
                                 <div className="flex w-[15%] items-center justify-center">아이디어 인큐베이팅</div>
@@ -215,7 +200,7 @@ function Me() {
                                     </Button>
                                 </div>
                             </div>
-                            <div className="flex h-10 min-h-10 w-full items-center bg-card">
+                            <div className="flex h-10 min-h-10 w-full shrink-0 items-center border-b bg-card">
                                 <div className="flex w-[42.5%] items-center justify-center"> B2B 물류 최적화 SaaS 아이디어 린 캔버스 & 가치제안서</div>
                                 <div className="flex w-[15%] items-center justify-center">2026년 10월 13일</div>
                                 <div className="flex w-[15%] items-center justify-center">아이디어 인큐베이팅</div>
@@ -234,7 +219,7 @@ function Me() {
                                     </Button>
                                 </div>
                             </div>
-                            <div className="flex h-10 min-h-10 w-full items-center bg-card">
+                            <div className="flex h-10 min-h-10 w-full shrink-0 items-center border-b bg-card">
                                 <div className="flex w-[42.5%] items-center justify-center"> B2B 물류 최적화 SaaS 아이디어 린 캔버스 & 가치제안서</div>
                                 <div className="flex w-[15%] items-center justify-center">2026년 10월 13일</div>
                                 <div className="flex w-[15%] items-center justify-center">아이디어 인큐베이팅</div>
@@ -253,7 +238,7 @@ function Me() {
                                     </Button>
                                 </div>
                             </div>
-                            <div className="flex h-10 min-h-10 w-full items-center bg-card">
+                            <div className="flex h-10 min-h-10 w-full shrink-0 items-center border-b bg-card">
                                 <div className="flex w-[42.5%] items-center justify-center"> B2B 물류 최적화 SaaS 아이디어 린 캔버스 & 가치제안서</div>
                                 <div className="flex w-[15%] items-center justify-center">2026년 10월 13일</div>
                                 <div className="flex w-[15%] items-center justify-center">아이디어 인큐베이팅</div>
@@ -272,7 +257,7 @@ function Me() {
                                     </Button>
                                 </div>
                             </div>
-                            <div className="flex h-10 min-h-10 w-full items-center bg-card">
+                            <div className="flex h-10 min-h-10 w-full shrink-0 items-center border-b-0 bg-card">
                                 <div className="flex w-[42.5%] items-center justify-center"> B2B 물류 최적화 SaaS 아이디어 린 캔버스 & 가치제안서</div>
                                 <div className="flex w-[15%] items-center justify-center">2026년 10월 13일</div>
                                 <div className="flex w-[15%] items-center justify-center">아이디어 인큐베이팅</div>
@@ -293,8 +278,8 @@ function Me() {
                             </div>
                         </div>
                         {/* 페이지네이션 */}
-                        <div className="flex justify-between">
-                            <span className="mt-1.5">전체 32개 문서 중 1-6 항목 표시 중</span>
+                        <div className="flex shrink-0 justify-between">
+                            <span className="mt-1.5 text-neutral-400">전체 32개 문서 중 1-6 항목 표시 중</span>
                             {/* 32px */}
                             <AppPagination />
                         </div>
@@ -305,4 +290,4 @@ function Me() {
     )
 }
 
-export default Me
+export default Projects
