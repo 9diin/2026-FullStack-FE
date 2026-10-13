@@ -1,4 +1,4 @@
-import MeSidebar from "./me-sidebar"
+import { MeSidebar } from "../../components/me"
 
 function MeLayout({
     children,

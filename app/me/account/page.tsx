@@ -2,6 +2,15 @@
 
 import { useState } from "react"
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
     Avatar,
     AvatarFallback,
     AvatarImage,
@@ -100,9 +109,29 @@ function Account() {
                             {!isPasswordValid && <span className="text-xs text-destructive">영문과 숫자를 포함해 8자 이상 입력해 주세요.</span>}
                         </Field>
                         <Field>
-                            <Button type="submit" variant="destructive" className="font-medium text-white">
-                                회원탈퇴
-                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger
+                                    render={
+                                        <Button type="button" variant="destructive" className="border-destructive/40 font-medium">
+                                            회원탈퇴
+                                        </Button>
+                                    }
+                                ></AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>정말 회원 탈퇴하시겠어요?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            회원 탈퇴 후에는 계정에 다시 로그인할 수 없습니다. 탈퇴를 진행하시겠습니까?
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>취소</AlertDialogCancel>
+                                        <AlertDialogAction variant="destructive" className="border-destructive/40">
+                                            회원 탈퇴
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </Field>
                     </FieldGroup>
                 </div>

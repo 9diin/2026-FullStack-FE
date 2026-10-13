@@ -30,7 +30,7 @@ function Projects() {
                         <h1 className="text-2xl font-semibold">내 프로젝트 & 문서 보관함</h1>
                         <p className="text-neutral-400">인공지능이 구조화된 사업계획서, 린 캔버스 및 피치덱 데이터를 실시간 관리합니다.</p>
                     </div>
-                    <Button className="px-3 py-5 text-base font-semibold">
+                    <Button variant="secondary" className="border border-neutral-700 font-semibold">
                         프로젝트 폴더 생성
                         <Plus />
                     </Button>
