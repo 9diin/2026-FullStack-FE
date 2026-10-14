@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { BadgeCheck, LogOut } from "lucide-react"
 
 import {
@@ -14,6 +16,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui"
+import { clearAccessTokenCookie } from "@/services/auth/session"
+import { getUserProfile } from "@/services/user/profile"
+import { clearAuthAndStorage } from "@/store/auth"
+import { toast } from "@/components/ui/toast"
 
 export function AppUser({
     user,
@@ -24,6 +30,37 @@ export function AppUser({
         avatar: string
     }
 }) {
+    const router = useRouter()
+    const [nickname, setNickname] = useState(user.name || "")
+
+    useEffect(() => {
+        let isCurrent = true
+
+        async function loadNickname() {
+            try {
+                const profile = await getUserProfile()
+                if (isCurrent && profile.nickname?.trim()) {
+                    setNickname(profile.nickname)
+                }
+            } catch (error: unknown) {
+                console.error("프로필 닉네임을 불러오지 못했습니다.", error)
+            }
+        }
+
+        void loadNickname()
+        return () => {
+            isCurrent = false
+        }
+    }, [])
+
+    function handleLogout() {
+        // 로그아웃 API가 준비되면 이 위치에서 서버 세션/refresh token도 함께 폐기합니다.
+        clearAccessTokenCookie()
+        clearAuthAndStorage()
+        toast.add({ title: "로그아웃되었습니다." })
+        router.replace("/sign-in")
+    }
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="flex w-fit cursor-pointer items-center gap-2 rounded-lg text-left">
@@ -41,7 +78,7 @@ export function AppUser({
                                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">{user.name}</span>
+                                <span className="truncate font-medium text-white">{nickname || "사용자"}</span>
                                 <span className="truncate text-xs">{user.email}</span>
                             </div>
                         </div>
@@ -50,16 +87,16 @@ export function AppUser({
 
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push("/me/account")}>
                         <BadgeCheck />
-                        Account
+                        계정 설정
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
                         <LogOut />
-                        Log out
+                        로그아웃
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
             </DropdownMenuContent>

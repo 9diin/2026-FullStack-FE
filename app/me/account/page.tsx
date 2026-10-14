@@ -30,6 +30,7 @@ import {
     SelectTrigger,
     SelectValue,
     Separator,
+    Skeleton,
     Tooltip,
     TooltipContent,
     TooltipTrigger,
@@ -37,10 +38,53 @@ import {
 import { clearAccessTokenCookie } from "@/services/auth/session"
 import { getOrCreateUserProfile, updateUserProfile, withdrawCurrentUser } from "@/services/user/profile"
 import type { UserProfileRead, UserProfileUpdate } from "@/api/user"
-import { useAuthStore } from "@/store/auth"
+import { clearAuthAndStorage, useAuthStore } from "@/store/auth"
 import { toast } from "@/components/ui/toast"
 
 const activityTypes = ["예비창업가", "스타트업 대표", "창업 멤버", "학생·연구자", "투자자·멘토"] as const
+
+function AccountSkeleton() {
+    return (
+        <div className="flex flex-1 items-start justify-center" aria-label="프로필 불러오는 중" aria-busy="true">
+            <div className="flex h-full w-100 flex-col">
+                <div className="relative h-30 w-full">
+                    <Skeleton className="h-full w-full rounded-t-md" />
+                    <Skeleton className="absolute top-2 right-2 h-8 w-8" />
+                </div>
+                <div className="-mt-10 ml-4 flex flex-col gap-4">
+                    <Skeleton className="h-20 w-20 rounded-md" />
+                    <div className="flex items-center gap-2">
+                        <Skeleton className="h-7 w-40" />
+                        <Skeleton className="h-4 w-20 rounded-full" />
+                    </div>
+                </div>
+                <div className="mt-6 flex w-full flex-col gap-2 p-4">
+                    <div className="flex items-center gap-1.5">
+                        <Skeleton className="h-5 w-5" />
+                        <Skeleton className="h-6 w-28" />
+                    </div>
+                    <div className="mb-2 flex flex-col gap-1">
+                        <Separator />
+                        <Separator />
+                    </div>
+                    <FieldGroup>
+                        {[0, 1, 2].map((field) => (
+                            <Field key={field}>
+                                <Skeleton className="h-4 w-16" />
+                                <Skeleton className="h-8 w-full rounded-lg" />
+                            </Field>
+                        ))}
+                        <div className="mb-2 flex flex-col gap-1">
+                            <Separator />
+                            <Separator />
+                        </div>
+                        <Skeleton className="h-8 w-full rounded-lg" />
+                    </FieldGroup>
+                </div>
+            </div>
+        </div>
+    )
+}
 
 function getErrorMessage(error: unknown, fallback: string): string {
     if (error instanceof AxiosError) {
@@ -57,7 +101,6 @@ function getErrorMessage(error: unknown, fallback: string): string {
 function Account() {
     const router = useRouter()
     const user = useAuthStore((state) => state.user)
-    const clearAuth = useAuthStore((state) => state.clearAuth)
     const [profile, setProfile] = useState<UserProfileRead | null>(null)
     const [nickname, setNickname] = useState("")
     const [activityType, setActivityType] = useState("")
@@ -98,6 +141,10 @@ function Account() {
 
     const canSave = nickname.trim().length > 0 && !isSaving
 
+    if (isLoading) {
+        return <AccountSkeleton />
+    }
+
     // 취소 버튼 클릭 시, 상태값 초기화
     function cancelEditing() {
         setNickname(profile?.nickname ?? "")
@@ -132,7 +179,7 @@ function Account() {
         try {
             await withdrawCurrentUser()
             clearAccessTokenCookie()
-            clearAuth()
+            clearAuthAndStorage()
             toast.add({ title: "회원 탈퇴가 완료되었습니다." })
             router.replace("/sign-in")
         } catch (error: unknown) {
@@ -238,7 +285,6 @@ function Account() {
                                     </SelectContent>
                                 </Select>
                             </Field>
-                            {isLoading && <p className="text-sm text-muted-foreground">프로필을 불러오는 중입니다.</p>}
                             <div className="mb-2 flex flex-col gap-1">
                                 <Separator />
                                 <Separator />

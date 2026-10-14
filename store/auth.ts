@@ -76,3 +76,8 @@ export const useAuthStore = create<AuthStore>()(
         }
     )
 )
+
+export function clearAuthAndStorage(): void {
+    useAuthStore.getState().clearAuth()
+    useAuthStore.persist.clearStorage()
+}

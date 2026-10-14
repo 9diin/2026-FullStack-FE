@@ -1,5 +1,5 @@
 import { AppContext } from "@/components/common"
-import { ProblemLayout, RadialChart, ScoreCard, SolutionLayout } from "@/components/main"
+import { ProblemLayout, RadialChart, ScaleUpLayout, ScoreCard, SolutionLayout } from "@/components/main"
 import { Badge, Card, Separator } from "@/components/ui"
 import { ArrowRight, Check, ChevronRight, CircleAlert, TrendingUp } from "lucide-react"
 
@@ -117,6 +117,7 @@ function Home() {
                                 <Separator />
                                 <Separator />
                             </div>
+                            <ScaleUpLayout />
                         </div>
                         {/* AI 분석 레포트 영역 */}
                         <Card className="w-2/5 gap-4 p-4">
