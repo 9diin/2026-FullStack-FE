@@ -1,7 +1,7 @@
 // NEXT.js에서 서버 측에서 요청을 제어(응답/리다이렉트)하기 위한 도구를 가져옵니다.
 import { NextResponse } from "next/server"
 // 타입스크립트에서 사용자의 요청(Request) 데이터 타입을 안전하게 다루기 위해 가져옵니다.
-import { NextRequest } from "next/server"
+import type { NextRequest } from "next/server"
 
 // [프록시(Proxy) 함수]
 // 사용자가 웹사이트의 특정 페이지에 접속하려고 할 때, 페이지가 열리기도 전에
@@ -24,12 +24,14 @@ export function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL("/", request.url))
     }
 
-    // [기능 B: 비로그인 유저의 보호된 페이지 접근 차단 (필요시 활성화)]
-    // 반대로, 로그인을 반드시 해야만 들어갈 수 있는 페이지(마이페이지 등)을 보호하고 싶을 때 사용합니다.
-    const isProtectedPage = pathname.startsWith("/users") || pathname.startsWith("/dashboard")
+    // [기능 B: 비로그인 유저의 보호된 페이지 접근 차단]
+    // 마이페이지(`/me`와 하위 경로)는 로그인한 사용자만 접근할 수 있습니다.
+    // 이 검사는 쿠키 존재 여부만 확인하는 빠른 페이지 접근 제어이며,
+    // 실제 인증·인가 검증은 백엔드에서도 반드시 수행해야 합니다.
+    const isProtectedPage = pathname === "/me" || pathname.startsWith("/me/") || pathname.startsWith("/users")
 
     if (!token && isProtectedPage) {
-        // 로그인을 안 한 상태라면, 로그인 페이지("/sign-in")로 튕겨냅니다.
+        // 로그인을 안 한 상태라면 로그인 페이지("/sign-in")로 보냅니다.
         return NextResponse.redirect(new URL("/sign-in", request.url))
     }
 
@@ -41,5 +43,5 @@ export function proxy(request: NextRequest) {
 // 웹사이트의 모든 페이지를 일일이 감시하면 서버 성능이 떨어지므로,
 // 보안 검문이 꼭 필요한 특정 주소 경로에서만 이 proxy 함수가 실행되도록 범위를 제한합니다.
 export const config = {
-    matcher: ["/sign-in", "/sign-up", "/users/:path*", "/dashboard/:path*"],
+    matcher: ["/sign-in", "/sign-up", "/me/:path*", "/users/:path*", "/dashboard/:path*"],
 }

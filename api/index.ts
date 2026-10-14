@@ -15,9 +15,13 @@ export const httpClient = axios.create({
 // 요청 인터셉터: 인증 토큰 자동 주입
 httpClient.interceptors.request.use(
     (config) => {
-        // SSR(서버 사이드 렌더링) 환경에서는 localStorage가 없으므로 체크 필요
+        // SSR 환경에서는 브라우저 쿠키에 접근할 수 없습니다.
         if (typeof window !== "undefined") {
-            const accessToken = localStorage.getItem("access_token")
+            const accessTokenCookie = document.cookie
+                .split(";")
+                .map((cookie) => cookie.trim())
+                .find((cookie) => cookie.startsWith("access_token="))
+            const accessToken = accessTokenCookie?.slice("access_token=".length)
 
             if (accessToken) {
                 config.headers.Authorization = `Bearer ${accessToken}`

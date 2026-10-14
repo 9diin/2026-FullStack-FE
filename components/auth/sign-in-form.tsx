@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/auth"
 
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Field, FieldDescription, FieldGroup, FieldLabel, Input } from "@/components/ui"
 import { signIn } from "@/api/auth"
+import { saveAccessTokenCookie } from "@/services/auth/session"
 import { toast } from "../ui/toast"
 
 function SignInForm() {
@@ -96,7 +97,7 @@ function SignInForm() {
                 // [보안/미들웨어용] 토큰을 쿠키에 저장
                 // 만약 백엔드가 쿠키를 자동으로 심어주지 않는다면, 프론트엔드에서 아래와 같이 쿠키에 저장합니다.
                 // (실무에서는 백엔드가 Set-Cookie로 HttpOnly 쿠키를 내려주는 것이 가장 안전합니다.)
-                document.cookie = `access_token=${access_token}; path=/; max-age=86400; secure; samesite=strict`
+                saveAccessTokenCookie(access_token)
 
                 // 만약 'js-cookie'를 쓴다면:
                 // Cookies.set("access_token", access_token, { expires: 1, secure: true, sameSite: "strict" })

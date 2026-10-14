@@ -2,7 +2,7 @@ import "./globals.css"
 import localFont from "next/font/local"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
-import { AppHeader } from "@/components/common"
+import { AppHeader, AuthHydration } from "@/components/common"
 import { Toaster } from "@/components/ui/toast"
 import { TooltipProvider } from "@/components/ui"
 
@@ -32,6 +32,7 @@ export default function RootLayout({
             <body>
                 <ThemeProvider defaultTheme="dark">
                     <TooltipProvider>
+                        <AuthHydration />
                         <div className="flex min-h-screen flex-col gap-2 p-4 pt-2">
                             <AppHeader />
                             <main className="h-[calc(100vh-4rem)] w-full">{children}</main>
