@@ -158,7 +158,7 @@ function TeamLayout() {
                     ))}
                 </div>
                 <div className="flex items-start gap-1.5 text-xs text-neutral-400">
-                    <CircleAlert size={14} className="mt-0.5 shrink-0 text-amber-400" />
+                    <CircleAlert size={14} className="mt-px shrink-0 text-amber-400" />
                     <p>초기에는 핵심 역할 중심으로 운영하고, 사용자 증가와 반복 업무 발생 시점에 맞춰 채용을 확장합니다.</p>
                 </div>
             </section>
