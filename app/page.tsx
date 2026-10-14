@@ -1,5 +1,5 @@
 import { AppContext } from "@/components/common"
-import { ProblemLayout, RadialChart, ScaleUpLayout, ScoreCard, SolutionLayout } from "@/components/main"
+import { ProblemLayout, RadialChart, ScaleUpLayout, ScoreCard, SolutionLayout, TeamLayout } from "@/components/main"
 import { Badge, Card, Separator } from "@/components/ui"
 import { ArrowRight, Check, ChevronRight, CircleAlert, TrendingUp } from "lucide-react"
 
@@ -7,10 +7,12 @@ import { ArrowRight, Check, ChevronRight, CircleAlert, TrendingUp } from "lucide
 // ⭐️ 화면 명세서 => 기능 명세서 => 화면 설계서 => 컴포넌트 설계서 => 컴포넌트 구현
 function Home() {
     return (
-        <div className="flex h-full w-full gap-2">
-            <AppContext />
+        <div className="flex h-full min-h-0 w-full gap-2 overflow-hidden">
+            <aside className="h-full min-h-0 shrink-0 rounded-md border border-card bg-card/50 p-2">
+                <AppContext />
+            </aside>
             {/* 아이디어 구조화 / 사업계획서 도출 */}
-            <div className="flex flex-1 justify-center rounded-md border border-card bg-card/50 bg-[radial-gradient(var(--border)_1px,transparent_1px)] bg-size-[16px_16px] p-4 text-card-foreground">
+            <div className="flex min-h-0 min-w-0 flex-1 justify-center overflow-y-auto overscroll-contain rounded-md border border-card bg-card/50 bg-[radial-gradient(var(--border)_1px,transparent_1px)] bg-size-[16px_16px] p-4 text-card-foreground">
                 {/* 콘텐츠 영역 */}
                 <div className="flex max-w-7xl flex-1 flex-col gap-4">
                     <div>
@@ -104,7 +106,7 @@ function Home() {
                         <Separator />
                         <Separator />
                     </div>
-                    <div className="flex w-full gap-4">
+                    <div className="flex w-full items-start gap-4 pb-4">
                         {/* 문제인식 - 솔루션 - 성장전략 - 팀 빌딩 선택 후 보이는 콘텐츠 영역 */}
                         <div className="flex w-3/5 flex-col gap-4">
                             <ProblemLayout />
@@ -118,9 +120,14 @@ function Home() {
                                 <Separator />
                             </div>
                             <ScaleUpLayout />
+                            <div className="flex flex-col gap-1">
+                                <Separator />
+                                <Separator />
+                            </div>
+                            <TeamLayout />
                         </div>
                         {/* AI 분석 레포트 영역 */}
-                        <Card className="w-2/5 gap-4 p-4">
+                        <Card className="sticky top-0 max-h-[calc(100vh-6rem)] w-2/5 gap-4 overflow-y-auto p-4">
                             <div className="flex flex-col gap-2">
                                 <span className="text-xl font-semibold">AI 정밀 적합도 진단 보고서</span>
                                 <p className="text-neutral-400">
