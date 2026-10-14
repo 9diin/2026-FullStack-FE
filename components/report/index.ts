@@ -1,0 +1,5 @@
+export { default as BusinessPlanReportHeader } from "./business-plan-report-header"
+export { default as BusinessPlanProblemSection } from "./business-plan-problem-section"
+export { default as BusinessPlanFeasibilitySection } from "./business-plan-feasibility-section"
+export { default as BusinessPlanGrowthStrategySection } from "./business-plan-growth-strategy-section"
+export { default as BusinessPlanTeamSection } from "./business-plan-team-section"

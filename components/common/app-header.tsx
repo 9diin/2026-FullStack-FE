@@ -3,8 +3,9 @@
 import Image from "next/image"
 import { Comic_Neue } from "next/font/google"
 import { usePathname, useRouter } from "next/navigation"
-import { Tabs, TabsList, TabsTrigger, Button } from "../ui"
+import { Button, Tabs, TabsList, TabsTrigger } from "../ui"
 import { useAuthStore } from "@/store/auth"
+import { useWorkspaceStore, type WorkspaceView } from "@/store/workspace"
 import { AppUser } from "./app-user"
 
 const comicNeue = Comic_Neue({
@@ -16,9 +17,12 @@ const comicNeue = Comic_Neue({
 function AppHeader() {
     const router = useRouter()
     const user = useAuthStore((state) => state.user)
+    const workspaceView = useWorkspaceStore((state) => state.view)
+    const setWorkspaceView = useWorkspaceStore((state) => state.setView)
     const pathname = usePathname()
     const isAuthPage = pathname === "/sign-in" || pathname === "/sign-up"
     const isMyPage = pathname === "/me" || pathname.startsWith("/me/")
+    const isHomePage = pathname === "/"
 
     return (
         <header className="flex min-h-8 w-full items-center justify-between">
@@ -29,14 +33,24 @@ function AppHeader() {
             </div>
 
             {!isAuthPage && (
-                <div className={`flex min-w-0 flex-1 items-center ${isMyPage ? "justify-end" : "justify-between"}`}>
-                    {!isMyPage && (
-                        <Tabs defaultValue="idea" className="pl-2">
+                <div className="flex min-w-0 flex-1 items-center justify-between">
+                    {isHomePage ? (
+                        <Tabs
+                            value={workspaceView}
+                            onValueChange={(value) => {
+                                if (value === "idea" || value === "analytics") {
+                                    setWorkspaceView(value as WorkspaceView)
+                                }
+                            }}
+                            className="pl-6"
+                        >
                             <TabsList>
                                 <TabsTrigger value="idea">아이디어 구조화</TabsTrigger>
-                                <TabsTrigger value="biz-plan">사업계획서 도출</TabsTrigger>
+                                <TabsTrigger value="analytics">사업계획서 도출</TabsTrigger>
                             </TabsList>
                         </Tabs>
+                    ) : (
+                        <div />
                     )}
                     {user ? (
                         <AppUser user={user} />
