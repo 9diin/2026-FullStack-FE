@@ -2,7 +2,7 @@
 
 import { AppContext } from "@/components/common"
 import { ProblemLayout, RadialChart, ScaleUpLayout, ScoreCard, SolutionLayout, TeamLayout } from "@/components/main"
-import { BusinessPlanFeasibilitySection, BusinessPlanGrowthStrategySection, BusinessPlanProblemSection, BusinessPlanTeamSection } from "@/components/report"
+import { BusinessPlanReport } from "@/components/report"
 import { Badge, Card, Separator } from "@/components/ui"
 import { ArrowRight, Check, ChevronRight, CircleAlert, TrendingUp } from "lucide-react"
 import { useWorkspaceStore } from "@/store/workspace"
@@ -162,10 +162,7 @@ function Home() {
                     </div>
                 ) : (
                     <div className="scrollbar-hidden flex h-full w-full min-w-0 flex-1 flex-col items-center justify-start gap-6 overflow-y-auto rounded-xl border border-border/60 bg-card/50 bg-[radial-gradient(oklch(1_0_0/0.12)_1.5px,transparent_1.5px)] bg-size-[20px_20px] p-6 text-center">
-                        <BusinessPlanProblemSection />
-                        <BusinessPlanFeasibilitySection />
-                        <BusinessPlanGrowthStrategySection />
-                        <BusinessPlanTeamSection />
+                        <BusinessPlanReport />
                     </div>
                 )}
             </div>

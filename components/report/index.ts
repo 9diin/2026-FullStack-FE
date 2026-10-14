@@ -1,3 +1,4 @@
+export { default as BusinessPlanReport } from "./business-plan-report"
 export { default as BusinessPlanReportHeader } from "./business-plan-report-header"
 export { default as BusinessPlanProblemSection } from "./business-plan-problem-section"
 export { default as BusinessPlanFeasibilitySection } from "./business-plan-feasibility-section"
