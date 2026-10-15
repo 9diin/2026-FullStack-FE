@@ -39,9 +39,7 @@ function SolutionLayout() {
                                 <p className="text-xs text-emerald-400">문 열림 즉시 0.4초 만에 냉장고 52종 재료 감지</p>
                             </div>
                         </div>
-                        <p className="text-justify text-xs text-neutral-400">
-                            ESP32-S3 초저전력 엣지 모듈과 온디바이스 AI 모델로 신선실 식자재 상태 및 유통기한 D-day를 실시간 카탈로그화 합니다.
-                        </p>
+                        <p className="text-justify text-xs text-neutral-400">ESP32-S3 엣지 모듈이 식재료와 신선도·유통기한을 실시간 인식합니다.</p>
                         <Separator />
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -68,7 +66,7 @@ function SolutionLayout() {
                             </div>
                         </div>
                         <p className="text-justify text-xs text-neutral-400">
-                            개인 취향&middot;보유 양념&middot;알레르기 필터를 적용한 Milvus 벡터 RAG엔진이 현재 재고만으로 완성 가능한 황금 레시피를 합성합니다.
+                            내 취향과 알레르기 정보, 냉장고 속 유통기한 임박 식재료까지 분석하여 단 15분 만에 완성하는 맞춤형 레시피를 추천해 드립니다.
                         </p>
                         <Separator />
                         <div className="flex items-center justify-between">
@@ -95,9 +93,7 @@ function SolutionLayout() {
                                 <p className="text-xs text-blue-400">필요한 최소 단위 재료만 배민&middot;쿠팡 1시간 배송 바인딩</p>
                             </div>
                         </div>
-                        <p className="text-justify text-xs text-neutral-400">
-                            대용량 구매 낭비 없이 요리에 꼭 필요한 소량 부재료 양념만 자동 선별하여 퀵커머스 장바구니에 담고 원터치 결제를 지원합니다.
-                        </p>
+                        <p className="text-justify text-xs text-neutral-400">부족한 재료만 골라 퀵커머스 장바구니에 담고 간편 결제를 지원합니다.</p>
                         <Separator />
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -123,9 +119,7 @@ function SolutionLayout() {
                                 <p className="text-xs text-violet-400">소비 데이터 축적 및 B2B 수요예측 인사이트 환류</p>
                             </div>
                         </div>
-                        <p className="text-justify text-xs text-neutral-400">
-                            1인 가구 주가 소비 주기와 폐기 텔레메트리를 학습하여 추천 정확도를 지속 개선하고 F&B 파트너사에 정밀 수요 데이터를 연계합니다.
-                        </p>
+                        <p className="text-justify text-xs text-neutral-400">소비·폐기 데이터를 학습해 추천을 개선하고 파트너 수요예측에 활용합니다.</p>
                         <Separator />
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -140,45 +134,57 @@ function SolutionLayout() {
                 </div>
             </div>
             <Separator />
-            <div className="flex w-full items-center gap-4">
-                <Card className="h-full w-full gap-2 border border-rose-400 p-3">
+            <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-stretch gap-4">
+                <Card className="h-full min-w-0 flex-1 gap-2 border border-rose-400 p-3">
                     <div className="flex w-full items-center justify-between">
                         <Badge className="bg-rose-900/50 text-rose-400">AS-IS</Badge>
                         <span className="text-xs text-rose-400">조리 포기율 62%</span>
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="grid grid-rows-3 gap-2">
                         <div className="flex items-start gap-1.5">
                             <X size={18} className="mt-0.5 min-w-4.5 text-rose-400" />
-                            <span>퇴근 후 냉장고 문 열고 재고 뒤적거리다 인지 부하 발생</span>
+                            <span className="min-h-10 leading-5">
+                                퇴근 후 냉장고를 열어도 재고가 한눈에 보이지 않아, 필요한 식재료를 찾는 데 시간과 집중력을 계속 소모합니다.
+                            </span>
                         </div>
                         <div className="flex items-start gap-1.5">
                             <X size={18} className="mt-0.5 min-w-4.5 text-rose-400" />
-                            <span>유통기한 파악 실패로 부패 후 음식물 쓰레기화</span>
+                            <span className="min-h-10 leading-5">
+                                식재료별 유통기한과 보관 상태를 제때 확인하기 어려워, 아직 먹을 수 있는 재료도 상한 뒤에야 발견합니다.
+                            </span>
                         </div>
                         <div className="flex items-start gap-1.5">
                             <X size={18} className="mt-0.5 min-w-4.5 text-rose-400" />
-                            <span>양념 1개 부족하면 결국 배달앱 주문으로 전락</span>
+                            <span className="min-h-10 leading-5">
+                                요리에 필요한 재료나 양념이 하나라도 부족하면 대체 방법을 찾기 어려워, 결국 배달 주문으로 이어집니다.
+                            </span>
                         </div>
                     </div>
                 </Card>
-                <ArrowBigRight className="min-w-6" fill="#ffffff" />
-                <Card className="h-full w-full gap-2 border border-emerald-400 p-3">
+                <ArrowBigRight className="min-w-6 self-center" fill="#ffffff" />
+                <Card className="h-full min-w-0 flex-1 gap-2 border border-emerald-400 p-3">
                     <div className="flex w-full items-center justify-between">
                         <Badge className="bg-emerald-900/50 text-emerald-400">TO-BE</Badge>
                         <span className="text-xs text-emerald-400">월 3.2만 원 절감</span>
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="grid grid-rows-3 gap-2">
                         <div className="flex items-start gap-1.5">
                             <CheckIcon size={18} className="mt-0.5 min-w-4.5 text-emerald-400" />
-                            <span>사진 1장 촬영 시 남은 재료 및 D-day 자동 카탈로그화</span>
+                            <span className="min-h-10 leading-5">
+                                냉장고 사진 한 장으로 식재료와 보관 상태를 인식하고, 각 재료의 유통기한과 D-day를 자동 기록합니다.
+                            </span>
                         </div>
                         <div className="flex items-start gap-1.5">
                             <CheckIcon size={18} className="mt-0.5 min-w-4.5 text-emerald-400" />
-                            <span>퇴근 30분 전 15분 완성 맞춤형 레시피 푸시 전송</span>
+                            <span className="min-h-10 leading-5">
+                                퇴근 시간에 맞춰 보유 재료와 취향을 반영한 15분 레시피를 미리 추천해, 귀가 후 바로 조리할 수 있습니다.
+                            </span>
                         </div>
                         <div className="flex items-start gap-1.5">
                             <CheckIcon size={18} className="mt-0.5 min-w-4.5 text-emerald-400" />
-                            <span>부족한 최소 재료만 퀵커머스 1시간 배송 자동 키트 연동</span>
+                            <span className="min-h-10 leading-5">
+                                레시피에 필요한 재료 중 부족한 항목만 최소 단위로 골라, 퀵커머스 장보기와 빠른 배송을 연결합니다.
+                            </span>
                         </div>
                     </div>
                 </Card>

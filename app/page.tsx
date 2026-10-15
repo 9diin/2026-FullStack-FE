@@ -117,7 +117,7 @@ function Home() {
                                 </div>
                                 <div className="flex w-full items-start gap-4 pb-4">
                                     {/* 문제인식 - 솔루션 - 성장전략 - 팀 빌딩 선택 후 보이는 콘텐츠 영역 */}
-                                    <div className="flex w-3/5 flex-col gap-4">
+                                    <div className="flex w-[65%] flex-col gap-4">
                                         <ProblemLayout />
                                         <div className="flex flex-col gap-1">
                                             <Separator />
@@ -136,7 +136,7 @@ function Home() {
                                         <TeamLayout />
                                     </div>
                                     {/* AI 분석 레포트 영역 */}
-                                    <Card className="sticky top-0 max-h-[calc(100vh-6rem)] w-2/5 gap-4 overflow-y-auto p-4">
+                                    <Card className="sticky top-0 max-h-[calc(100vh-6rem)] w-[35%] gap-4 overflow-y-auto p-4">
                                         <div className="flex flex-col gap-2">
                                             <span className="text-xl font-semibold">AI 정밀 적합도 진단 보고서</span>
                                             <p className="text-neutral-400">
