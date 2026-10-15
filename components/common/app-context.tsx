@@ -1,9 +1,9 @@
 "use client"
 
-import { useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react"
+import { useRef, useState, type ChangeEvent, type SubmitEvent, type KeyboardEvent } from "react"
 import { Badge, Button, Card, Separator, Skeleton, Textarea } from "@/components/ui"
 import { toast } from "@/components/ui/toast"
-import { ArrowUpRight, Brain, Check, File, Paperclip, ScanSearch, Sparkles } from "lucide-react"
+import { ArrowUpRight, Brain, Check, File, Paperclip, ScanSearch, Sprout } from "lucide-react"
 import { ContextLayout } from "../main"
 import {
     createIdeaGeneration,
@@ -106,7 +106,7 @@ function AppContext() {
         }
     }
 
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault()
 
         if (submissionLock.current || isUploading) {
@@ -220,7 +220,7 @@ function AppContext() {
                 {!showContext ? (
                     <div className="flex h-full flex-col items-center justify-center gap-3 px-3 text-center">
                         <div className="flex size-9 items-center justify-center rounded-full bg-violet-500/10 text-violet-400">
-                            <Sparkles aria-hidden="true" className="size-4" />
+                            <Sprout aria-hidden="true" className="size-4" />
                         </div>
                         <div className="flex flex-col gap-1">
                             <p className="text-sm font-semibold">아이디어 씨앗을 심어볼까요?</p>
