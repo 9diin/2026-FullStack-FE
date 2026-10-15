@@ -219,8 +219,8 @@ function AppContext() {
             <div className="scrollbar-hidden flex min-h-0 w-full flex-1 flex-col gap-6 overflow-y-auto overscroll-contain rounded-md bg-card/50 p-3">
                 {!showContext ? (
                     <div className="flex h-full flex-col items-center justify-center gap-3 px-3 text-center">
-                        <div className="flex size-11 items-center justify-center rounded-full bg-violet-500/10 text-violet-400">
-                            <Sparkles aria-hidden="true" className="size-5" />
+                        <div className="flex size-9 items-center justify-center rounded-full bg-violet-500/10 text-violet-400">
+                            <Sparkles aria-hidden="true" className="size-4" />
                         </div>
                         <div className="flex flex-col gap-1">
                             <p className="text-sm font-semibold">아이디어 씨앗을 심어볼까요?</p>
