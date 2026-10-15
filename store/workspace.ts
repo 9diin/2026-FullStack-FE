@@ -64,7 +64,7 @@ interface WorkspaceStore {
     setView: (view: WorkspaceView) => void
     activeIdeaId: string | null
     problemDetail: ProblemSectionData
-    setActiveIdea: (ideaId: string, title?: string) => void
+    setActiveIdea: (ideaId: string | null, title?: string) => void
     setProblemDetail: (detail: ProblemSectionData) => void
     elaborationPhase: ElaborationPhase
     setElaborationPhase: (phase: ElaborationPhase) => void
@@ -74,16 +74,18 @@ interface WorkspaceStore {
 export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
     view: "idea",
     setView: (view) => set({ view }),
-    activeIdeaId: "idea-fridge-vision-01",
+    activeIdeaId: null,
     problemDetail: INITIAL_PROBLEM_DETAIL,
     setActiveIdea: (ideaId, title) =>
         set((state) => ({
             activeIdeaId: ideaId,
-            problemDetail: {
-                ...state.problemDetail,
-                ideaId,
-                title: title ?? state.problemDetail.title,
-            },
+            ...(ideaId && {
+                problemDetail: {
+                    ...state.problemDetail,
+                    ideaId,
+                    title: title ?? state.problemDetail.title,
+                },
+            }),
         })),
     setProblemDetail: (detail) => set({ problemDetail: detail, activeIdeaId: detail.ideaId }),
     elaborationPhase: "idle",

@@ -83,6 +83,7 @@ function AppContext() {
     const [pendingSelectionId, setPendingSelectionId] = useState<string | null>(null)
     const [confirmingIdea, setConfirmingIdea] = useState<IdeaSuggestion | null>(null)
     const setActiveIdea = useWorkspaceStore((state) => state.setActiveIdea)
+    const setElaborationPhase = useWorkspaceStore((state) => state.setElaborationPhase)
     const setProblemDetail = useWorkspaceStore((state) => state.setProblemDetail)
     const startElaborationSequence = useWorkspaceStore((state) => state.startElaborationSequence)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -148,6 +149,8 @@ function AppContext() {
 
         submissionLock.current = true
         setIsSubmitting(true)
+        setActiveIdea(null)
+        setElaborationPhase("idle")
         setSuggestions([])
         setSelectedIdeaId(null)
         setGenerationId(null)
@@ -183,11 +186,6 @@ function AppContext() {
             setSourceFiles(response.context.source_files)
             setFocusItems(response.context.focus_items)
             setGenerationId(response.generation_id)
-            const firstIdea = response.suggestions[0]
-            if (firstIdea) {
-                setSelectedIdeaId(firstIdea.id)
-                setActiveIdea(firstIdea.id, firstIdea.title)
-            }
             setIdea("")
             toast.add({
                 title: "아이디어 도출 완료",
