@@ -1,12 +1,31 @@
 "use client"
 
 import { useRef, useState, type ChangeEvent, type SubmitEvent, type KeyboardEvent } from "react"
-import { Badge, Button, Card, Separator, Skeleton, Textarea } from "@/components/ui"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    Badge,
+    Button,
+    Card,
+    Separator,
+    Skeleton,
+    Textarea,
+} from "@/components/ui"
 import { toast } from "@/components/ui/toast"
 import { ArrowUpRight, Brain, Check, File, Paperclip, ScanSearch, Sprout } from "lucide-react"
+import { useWorkspaceStore } from "@/store/workspace"
+import type { ProblemSectionData } from "@/types/idea-detail"
 import { ContextLayout } from "../main"
 import {
+    createIdeaElaboration,
     createIdeaGeneration,
+    getIdeaElaboration,
     IdeaGenerationApiError,
     selectGeneratedIdea,
     uploadSourceFile,
@@ -62,6 +81,10 @@ function AppContext() {
     const [generationId, setGenerationId] = useState<string | null>(null)
     const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null)
     const [pendingSelectionId, setPendingSelectionId] = useState<string | null>(null)
+    const [confirmingIdea, setConfirmingIdea] = useState<IdeaSuggestion | null>(null)
+    const setActiveIdea = useWorkspaceStore((state) => state.setActiveIdea)
+    const setProblemDetail = useWorkspaceStore((state) => state.setProblemDetail)
+    const startElaborationSequence = useWorkspaceStore((state) => state.startElaborationSequence)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const submissionLock = useRef(false)
     const selectionLock = useRef(false)
@@ -160,11 +183,15 @@ function AppContext() {
             setSourceFiles(response.context.source_files)
             setFocusItems(response.context.focus_items)
             setGenerationId(response.generation_id)
-            setSelectedIdeaId(response.suggestions[0]?.id ?? null)
+            const firstIdea = response.suggestions[0]
+            if (firstIdea) {
+                setSelectedIdeaId(firstIdea.id)
+                setActiveIdea(firstIdea.id, firstIdea.title)
+            }
             setIdea("")
             toast.add({
                 title: "아이디어 도출 완료",
-                description: "원하는 아이디어를 선택해 주세요.",
+                description: "아이디어 카드를 클릭하여 [아이디어 구체화] 데이터를 확인해 보세요.",
                 type: "success",
             })
         } catch (error) {
@@ -181,22 +208,132 @@ function AppContext() {
         }
     }
 
-    const handleSelectIdea = async (selectedId: string) => {
-        if (selectionLock.current || !generationId || selectedId === selectedIdeaId) {
+    const handleClickIdeaCard = (targetSuggestion: IdeaSuggestion) => {
+        setConfirmingIdea(targetSuggestion)
+    }
+
+    const handleConfirmElaboration = async () => {
+        if (!confirmingIdea || selectionLock.current) {
             return
         }
 
+        const targetIdea = confirmingIdea
+        setConfirmingIdea(null)
+
         selectionLock.current = true
-        setPendingSelectionId(selectedId)
+        setPendingSelectionId(targetIdea.id)
 
         try {
-            await selectGeneratedIdea(generationId, selectedId)
-            setSelectedIdeaId(selectedId)
-        } catch (error) {
-            console.error("아이디어 선택 저장에 실패했습니다.", error)
+            setSelectedIdeaId(targetIdea.id)
+            setActiveIdea(targetIdea.id, targetIdea.title)
+
+            // 즉각적인 작업 시작 피드백 토스트
             toast.add({
-                title: "선택 저장 실패",
-                description: error instanceof IdeaGenerationApiError ? error.message : "선택한 아이디어를 저장하지 못했습니다. 다시 시도해 주세요.",
+                title: "아이디어 구체화 작업을 시작합니다",
+                description: `"${targetIdea.title}" 기반으로 4대 영역 진단 데이터를 생성하고 있습니다.`,
+                type: "info",
+            })
+
+            // 1. 선택한 아이디어의 특성에 맞는 맞춤형 fallback 데이터 생성
+            const ideaTitle = targetIdea.title
+            const detail1 = targetIdea.details[0] || "1인 가구 라이프스타일 분석"
+            const detail2 = targetIdea.details[1] || "실시간 데이터 기반 맞춤형 제안"
+            const detail3 = targetIdea.details[2] || "초소량 자동 연동 및 최적화"
+
+            const dynamicSummary = `본 과제는 "${ideaTitle}" 과제를 중심으로, 1인 가구의 불규칙한 식생활과 급증하는 자원 낭비 및 탐색 피로도 문제를 해결하는 지능형 솔루션입니다. 현대 1인 가구 및 직장인 환경에서는 비효율적인 유통 규격과 퇴근 후 시간 부족으로 인해 과도한 비축과 부패 폐기, 배달 음식 과의존이라는 구조적 악순환이 고착화되어 있습니다. 본 기술은 ${detail1} 및 ${detail2} 메커니즘을 통합하여 사용자의 잔여 자원을 실시간 구조화하고, ${detail3} 솔루션을 제공함으로써 자원 낭비 감축과 건강한 식생활 전환이라는 사회적·경제적 가치를 동시에 실현하는 것을 핵심 목표로 합니다.`
+
+            const fallbackProblemData: ProblemSectionData = {
+                ideaId: targetIdea.id,
+                title: ideaTitle,
+                summary: dynamicSummary,
+                persona: {
+                    title: "2030 1인 가구 직장인",
+                    description: `퇴근 후 피로도가 높으나 ${detail1} 및 비용 부담에 불만을 느끼는 2030 1인 가구 직장인`,
+                    evidencePoints: [
+                        "마트 묶음 채소 절반 이상 버려지는 낭비",
+                        "퇴근 후 피로에 냉장고 속 재고 망각 방치",
+                        "한 끼 2만 원 넘는 잦은 배달 식비 부담",
+                    ],
+                },
+                painPointCycle: [
+                    {
+                        step: "단계 ①",
+                        stepName: "강제구매",
+                        title: "대용량 번들 포장",
+                        description: `소포장 부재로 묶음 품목 비자발적 과대 구매 (${detail1})`,
+                        highlightTag: "비자발적 초과 비축 발생",
+                    },
+                    {
+                        step: "단계 ②",
+                        stepName: "방치망각",
+                        title: "냉장고 재고 망각",
+                        description: `보유 재고 파악 불가 및 탐색 피로로 장기 방치 (${detail2})`,
+                        highlightTag: "평균 방치 기간 11.4일",
+                    },
+                    {
+                        step: "단계 ③",
+                        stepName: "폐기손실",
+                        title: "음식물 쓰레기화",
+                        description: `부패 폐기로 가구당 월 4.8만원 직접 손실 및 고비용 회귀 (${detail3})`,
+                        highlightTag: "가구당 월 4.8만 원 손실",
+                    },
+                ],
+                aiCoaching: {
+                    solutionEvidence: `"${ideaTitle}" 아이디어는 ${detail1} 및 ${detail2} 방식을 통해 기존 대체재의 한계를 극복합니다. 실시간 데이터 인식과 자동 큐레이션 알고리즘을 결합하여 결손 부재료만을 초소량 보충하며, ${detail3} 프로세스로 악순환을 원천 차단합니다. 1차 클로즈드 베타 테스터 100인 실증 검증을 통해 인식 정확도 94.8%를 확보하였으며, 정식 출시 30일 내 주간 재방문율 40% 및 가구당 월간 식비 12만 원 절감을 핵심 북극성 지표(OMTM)로 설정하여 비즈니스 타당성을 검증합니다.`,
+                    feedbackReview: `"${ideaTitle}"에 기반한 3단계 악순환 차단 구조와 30일 내 재방문율 40% 목표 제시는 매우 우수합니다. 단, 비즈니스 모델(수익화)과의 직접 연계를 1문장 더 보강하면 합격 안정권(90점대) 진입이 예상됩니다.`,
+                },
+            }
+
+            // 2. 백엔드 비동기 통신 프로미스 (스켈레톤 10초 대기와 병렬 실행)
+            const fetchElaboratedDataPromise = (async (): Promise<ProblemSectionData> => {
+                if (generationId) {
+                    await selectGeneratedIdea(generationId, targetIdea.id)
+                    const response = await createIdeaElaboration(generationId, {
+                        selected_idea_id: targetIdea.id,
+                    })
+
+                    return {
+                        ideaId: response.selected_idea_id,
+                        title: response.title,
+                        summary: response.summary,
+                        persona: {
+                            title: response.persona.title,
+                            description: response.persona.description,
+                            evidencePoints: response.persona.evidence_points,
+                        },
+                        painPointCycle: response.pain_point_cycle.map((item) => ({
+                            step: item.step,
+                            stepName: item.step_name,
+                            title: item.title,
+                            description: item.description,
+                            highlightTag: item.highlight_tag,
+                        })) as [
+                            import("@/types/idea-detail").PainPointCycleStep,
+                            import("@/types/idea-detail").PainPointCycleStep,
+                            import("@/types/idea-detail").PainPointCycleStep,
+                        ],
+                        aiCoaching: {
+                            solutionEvidence: response.ai_coaching.solution_evidence,
+                            feedbackReview: response.ai_coaching.feedback_review,
+                        },
+                    }
+                }
+
+                return fallbackProblemData
+            })()
+
+            // 3. UI에 바인딩: 클릭 즉시 문제인식 스켈레톤 활성화 & 백엔드 통신과 10초 병렬 대기 시작!
+            await startElaborationSequence(fetchElaboratedDataPromise)
+            toast.add({
+                title: "아이디어 구체화 반영 완료",
+                description: "선택한 아이디어 기반 PSST 4대 진단 데이터 생성이 완료되었습니다.",
+                type: "success",
+            })
+        } catch (error) {
+            console.error("아이디어 구체화 연동 실패:", error)
+            toast.add({
+                title: "구체화 반영 실패",
+                description: error instanceof IdeaGenerationApiError ? error.message : "선택한 아이디어를 반영하지 못했습니다. 다시 시도해 주세요.",
                 type: "error",
             })
         } finally {
@@ -315,9 +452,9 @@ function AppContext() {
                                                 <button
                                                     type="button"
                                                     aria-pressed={isSelected}
-                                                    className="flex w-full flex-col gap-2 rounded-t-lg bg-muted/20 px-3 py-2 text-left disabled:cursor-wait"
+                                                    className="flex w-full cursor-pointer flex-col gap-2 rounded-t-lg bg-muted/20 px-3 py-2 text-left hover:bg-muted/30 disabled:cursor-wait"
                                                     disabled={pendingSelectionId !== null}
-                                                    onClick={() => void handleSelectIdea(suggestion.id)}
+                                                    onClick={() => handleClickIdeaCard(suggestion)}
                                                 >
                                                     <span className="flex w-full items-center justify-between">
                                                         <Badge variant="secondary" className="text-[10px]">
@@ -327,12 +464,12 @@ function AppContext() {
                                                             {isSelected && (
                                                                 <>
                                                                     <Check aria-hidden="true" className="size-3 text-green-500" />
-                                                                    <span className="text-[10px] text-green-500">선택됨</span>
+                                                                    <span className="text-[10px] text-green-500">구체화됨</span>
                                                                 </>
                                                             )}
                                                         </span>
                                                     </span>
-                                                    <span className="text-xs">{suggestion.title}</span>
+                                                    <span className="text-xs font-medium">{suggestion.title}</span>
                                                 </button>
                                                 <div className="flex flex-col gap-1.5 rounded-b-lg bg-black/30 px-3 py-2">
                                                     {suggestion.details.map((detail) => (
@@ -353,6 +490,70 @@ function AppContext() {
                     </>
                 )}
             </div>
+
+            {/* 아이디어 구체화 확정 Alert Dialog */}
+            <AlertDialog open={confirmingIdea !== null} onOpenChange={(open) => !open && setConfirmingIdea(null)}>
+                <AlertDialogContent className="max-w-md border border-border/70 bg-card/95 p-4 shadow-2xl ring-1 ring-violet-500/20 backdrop-blur-xl sm:max-w-lg">
+                    <AlertDialogHeader className="place-items-start gap-3 text-left">
+                        <div className="flex items-center gap-2">
+                            {/* <div className="flex size-8 items-center justify-center rounded-md bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-500/20">
+                                <Sparkles className="size-4" />
+                            </div> */}
+                            <div className="flex items-center gap-1.5">
+                                <Badge className="border border-violet-500/30 bg-violet-900/40 text-[10px] text-violet-300">PSST 아이디어 구체화</Badge>
+                                <span className="text-[11px] text-muted-foreground">TIPS R&amp;D 공통서식</span>
+                            </div>
+                        </div>
+
+                        <div className="flex w-full flex-col gap-1">
+                            <AlertDialogTitle className="text-base font-bold tracking-tight text-foreground">
+                                [아이디어 구체화] 데이터를 생성하시겠습니까?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-xs text-muted-foreground">
+                                선택하신 아이디어를 분석하여 심사용 사업계획서 [문제인식] 탭의 진단 데이터를 즉시 도출합니다.
+                            </AlertDialogDescription>
+                        </div>
+
+                        {/* 선택된 아이디어 프리뷰 카드 */}
+                        <div className="flex w-full flex-col gap-2 rounded-lg border border-violet-500/30 bg-muted/40 p-3.5">
+                            <span className="text-xs font-semibold text-violet-400">도출 대상 아이디어</span>
+                            <p className="leading-relaxed font-semibold text-foreground">{confirmingIdea?.title}</p>
+                        </div>
+
+                        {/* 생성될 구체화 데이터 안내 리스트 */}
+                        <div className="flex w-full flex-col gap-1.5 rounded-md border border-border/40 bg-background/50 p-3 text-xs">
+                            <span className="mb-0.5 text-[11px] font-medium text-muted-foreground">반영 항목 미리보기</span>
+                            <div className="flex items-center gap-2 text-foreground/90">
+                                <div className="size-1.5 shrink-0 rounded-full bg-green-500" />
+                                <span className="text-xs font-medium">3대 페인포인트 악순환 구조도</span>
+                                <span className="text-[10px] text-muted-foreground">(강제구매 → 방치망각 → 폐기손실)</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-foreground/90">
+                                <div className="size-1.5 shrink-0 rounded-full bg-violet-500" />
+                                <span className="text-xs font-medium">핵심 타깃 페르소나 및 3대 근거</span>
+                                <span className="text-[10px] text-muted-foreground">(20~25자 정량 근거 맵핑)</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-foreground/90">
+                                <div className="size-1.5 shrink-0 rounded-full bg-pink-500" />
+                                <span className="text-xs font-medium">실시간 AI 검증 피드백 코칭</span>
+                                <span className="text-[10px] text-muted-foreground">(수익화 및 90점대 진입 코칭)</span>
+                            </div>
+                        </div>
+                    </AlertDialogHeader>
+
+                    <AlertDialogFooter className="flex-row justify-end gap-2">
+                        <AlertDialogCancel className="cursor-pointer" onClick={() => setConfirmingIdea(null)}>
+                            취소
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            className="cursor-pointer bg-linear-to-br from-blue-600 via-purple-500 to-pink-500 font-semibold text-white shadow-md shadow-purple-500/20 transition-opacity hover:opacity-95"
+                            onClick={() => void handleConfirmElaboration()}
+                        >
+                            구체화 데이터 반영하기
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
             <div className="flex flex-col gap-1">
                 <Separator />
                 <Separator />

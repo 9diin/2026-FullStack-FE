@@ -1,8 +1,11 @@
 import { Badge, Card, Separator } from "@/components/ui"
 import { ArrowBigDownDash, Square } from "lucide-react"
 import BusinessPlanReportHeader from "./business-plan-report-header"
+import { useWorkspaceStore } from "@/store/workspace"
 
 function BusinessPlanProblemSection() {
+    const problemDetail = useWorkspaceStore((state) => state.problemDetail)
+
     return (
         <div className="flex h-auto min-h-280.75 w-198.5 shrink-0 flex-col rounded-lg bg-white p-6 text-[11px] text-black">
             <BusinessPlanReportHeader />
@@ -16,7 +19,7 @@ function BusinessPlanProblemSection() {
                     <div className="flex h-9 w-full items-center">
                         <div className="flex h-full w-1/5 min-w-1/5 items-center justify-center bg-blue-500/15 font-semibold">신청 과제명</div>
                         <div className="flex h-full w-4/5 min-w-4/5 items-center justify-center bg-blue-50 pl-3">
-                            스마트 제로-웨이스트 다이닝 OS : 잔여 식재료 비전 인지 기반 인스턴트 밀키트화 플랫폼
+                            {problemDetail.title}
                         </div>
                     </div>
                     <div className="flex h-9 w-full items-center">
@@ -78,9 +81,7 @@ function BusinessPlanProblemSection() {
                 <div className="flex flex-col items-start gap-1">
                     <span className="text-sm font-medium">가. 1인 가구 식생활 실태 및 3대 핵심 페인포인트 (Pain Points)</span>
                     <p className="text-justify indent-2">
-                        통계청 인구총조사(2026년 기준)에 따르면 국내 1인 가구는 800만 가구(전체 가구의 34.5%)에 달하며, 이들의 월평균 식비 중 미사용 부패 폐기로
-                        인한 직접 손실액이 가구당 연간 58.4만 원에 이르고 있음. 마트의 대용량 묶음 포장 유통 구조와 퇴근 후 조리 마찰 비용이 결합하여 심각한
-                        자원 낭비와 배달 외식 고비용 고착화를 야기하고 있음.
+                        {problemDetail.summary}
                     </p>
                     <div className="mt-2 flex w-full flex-col items-center gap-3 rounded-sm border border-neutral-500 p-3">
                         <div className="flex w-full items-center justify-between">
@@ -92,35 +93,19 @@ function BusinessPlanProblemSection() {
                         </div>
                         <Separator className="bg-neutral-500" />
                         <div className="grid grid-cols-4 gap-3">
-                            <Card className="gap-2 rounded-sm bg-neutral-50 p-2 text-black">
-                                <div className="flex items-center justify-center rounded-xs bg-blue-50 py-1 text-xs font-medium text-black">단계 ➀ - 구매</div>
-                                <div className="my-1 flex flex-col gap-1">
-                                    <span className="font-medium">대용량 번들 강제 구매</span>
-                                    <p className="text-justify text-[11px] text-neutral-700">
-                                        마트 소포장 부재로 묶음 채소&middot;대용량 조미료 비자발적 과대 구매
-                                    </p>
-                                </div>
-                                <Separator className="bg-neutral-300" />
-                                <span className="text-xs font-medium text-neutral-700">초과 비축 발생</span>
-                            </Card>
-                            <Card className="gap-2 rounded-sm bg-neutral-50 p-2 text-black">
-                                <div className="flex items-center justify-center rounded-xs bg-blue-50 py-1 text-xs font-medium text-black">단계 ➁ - 구매</div>
-                                <div className="my-1 flex flex-col gap-1">
-                                    <span className="font-medium">냉장고 방치 및 망각</span>
-                                    <p className="text-justify text-[11px] text-neutral-700">보유 재고 망각 및 레시피 탐색 피로도 가중 (탐색 평균 68분 소요)</p>
-                                </div>
-                                <Separator className="bg-neutral-300" />
-                                <span className="text-xs font-medium text-neutral-700">평균 방치 11.4일</span>
-                            </Card>
-                            <Card className="gap-2 rounded-sm bg-neutral-50 p-2 text-black">
-                                <div className="flex items-center justify-center rounded-xs bg-blue-50 py-1 text-xs font-medium text-black">단계 ③ - 폐기</div>
-                                <div className="my-1 flex flex-col gap-1">
-                                    <span className="font-medium">부패 및 음식물 폐기</span>
-                                    <p className="text-justify text-[11px] text-neutral-700">구매 식자재의 43%가 미사용 부패 폐기되며 종량제 부담 초래</p>
-                                </div>
-                                <Separator className="bg-neutral-300" />
-                                <span className="text-xs font-medium text-neutral-700">가구당 월 4.8만 원 손실</span>
-                            </Card>
+                            {problemDetail.painPointCycle.map((step) => (
+                                <Card key={step.step} className="gap-2 rounded-sm bg-neutral-50 p-2 text-black">
+                                    <div className="flex items-center justify-center rounded-xs bg-blue-50 py-1 text-xs font-medium text-black">{step.step} - {step.stepName}</div>
+                                    <div className="my-1 flex flex-col gap-1">
+                                        <span className="font-medium">{step.title}</span>
+                                        <p className="text-justify text-[11px] text-neutral-700">
+                                            {step.description}
+                                        </p>
+                                    </div>
+                                    <Separator className="bg-neutral-300" />
+                                    <span className="text-xs font-medium text-neutral-700">{step.highlightTag}</span>
+                                </Card>
+                            ))}
                             <Card className="gap-2 rounded-sm bg-neutral-50 p-2 text-black">
                                 <div className="flex items-center justify-center rounded-xs bg-blue-50 py-1 text-xs font-medium text-black">단계 ④ - 의존</div>
                                 <div className="my-1 flex flex-col gap-1">

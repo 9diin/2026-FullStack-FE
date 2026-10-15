@@ -107,6 +107,7 @@ function SignInForm() {
 
                 toast.add({
                     title: res.message || "로그인에 성공했습니다.",
+                    type: "success",
                 })
 
                 // 3. 페이지 이동 및 서버 컴포넌트 갱신
@@ -121,6 +122,7 @@ function SignInForm() {
 
             toast.add({
                 title: errorMessage,
+                type: "error",
             })
         } finally {
             setIsLoading(false)

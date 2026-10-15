@@ -166,9 +166,9 @@ function Account() {
             setNickname(updatedProfile.nickname ?? nickname.trim())
             setActivityType(updatedProfile.activity_type ?? activityType)
             setIsEditing(false)
-            toast.add({ title: "프로필이 수정되었습니다." })
+            toast.add({ title: "프로필이 수정되었습니다.", type: "success" })
         } catch (error: unknown) {
-            toast.add({ title: getErrorMessage(error, "프로필 수정 중 오류가 발생했습니다.") })
+            toast.add({ title: getErrorMessage(error, "프로필 수정 중 오류가 발생했습니다."), type: "error" })
         } finally {
             setIsSaving(false)
         }
@@ -180,10 +180,10 @@ function Account() {
             await withdrawCurrentUser()
             clearAccessTokenCookie()
             clearAuthAndStorage()
-            toast.add({ title: "회원 탈퇴가 완료되었습니다." })
+            toast.add({ title: "회원 탈퇴가 완료되었습니다.", type: "success" })
             router.replace("/sign-in")
         } catch (error: unknown) {
-            toast.add({ title: getErrorMessage(error, "회원 탈퇴 중 오류가 발생했습니다.") })
+            toast.add({ title: getErrorMessage(error, "회원 탈퇴 중 오류가 발생했습니다."), type: "error" })
         } finally {
             setIsWithdrawing(false)
         }

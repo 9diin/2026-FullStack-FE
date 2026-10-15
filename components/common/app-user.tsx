@@ -57,7 +57,7 @@ export function AppUser({
         // 로그아웃 API가 준비되면 이 위치에서 서버 세션/refresh token도 함께 폐기합니다.
         clearAccessTokenCookie()
         clearAuthAndStorage()
-        toast.add({ title: "로그아웃되었습니다." })
+        toast.add({ title: "로그아웃되었습니다.", type: "success" })
         router.replace("/sign-in")
     }
 

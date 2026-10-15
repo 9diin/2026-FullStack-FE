@@ -51,14 +51,22 @@ function getErrorMessage(data: unknown): { message?: string; code?: string } {
         error?: { message?: unknown; code?: unknown }
     }
     const error = body.error
-    const message =
-        typeof error?.message === "string"
-            ? error.message
-            : typeof body.message === "string"
-              ? body.message
-              : typeof body.detail === "string"
-                ? body.detail
-                : undefined
+    let message: string | undefined
+
+    if (typeof error?.message === "string") {
+        message = error.message
+    } else if (typeof body.message === "string") {
+        message = body.message
+    } else if (typeof body.detail === "string") {
+        message = body.detail
+    } else if (Array.isArray(body.detail) && body.detail.length > 0) {
+        // FastAPI ValidationError (422) 형태: [{ loc: [...], msg: "..." }]
+        const firstError = body.detail[0]
+        if (typeof firstError === "object" && firstError !== null && "msg" in firstError) {
+            message = String(firstError.msg)
+        }
+    }
+
     const code = typeof error?.code === "string" ? error.code : typeof body.code === "string" ? body.code : undefined
 
     return { message, code }
@@ -195,3 +203,38 @@ export async function selectGeneratedIdea(generationId: string, selectedIdeaId: 
         throw toApiError(error, "아이디어 선택을 저장하지 못했습니다.")
     }
 }
+
+export async function createIdeaElaboration(
+    generationId: string,
+    request: import("@/types/idea-detail").ElaborationRequest
+): Promise<import("@/types/idea-detail").ElaborationResponse> {
+    try {
+        const response = await httpClient.post<import("@/types/idea-detail").ElaborationResponse>(
+            `/api/v1/idea-generations/${encodeURIComponent(generationId)}/elaboration`,
+            request,
+            { timeout: 30_000 }
+        )
+        return response.data
+    } catch (error) {
+        // 이미 생성된 경우(409 Conflict) 기존 구체화 데이터를 조회하여 반환
+        if (error instanceof AxiosError && error.response?.status === 409) {
+            return await getIdeaElaboration(generationId)
+        }
+        throw toApiError(error, "아이디어 구체화 데이터를 생성하지 못했습니다.")
+    }
+}
+
+export async function getIdeaElaboration(
+    generationId: string
+): Promise<import("@/types/idea-detail").ElaborationResponse> {
+    try {
+        const response = await httpClient.get<import("@/types/idea-detail").ElaborationResponse>(
+            `/api/v1/idea-generations/${encodeURIComponent(generationId)}/elaboration`,
+            { timeout: 30_000 }
+        )
+        return response.data
+    } catch (error) {
+        throw toApiError(error, "아이디어 구체화 데이터를 조회하지 못했습니다.")
+    }
+}
+

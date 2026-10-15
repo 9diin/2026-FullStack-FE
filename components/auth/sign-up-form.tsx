@@ -65,9 +65,9 @@ function SignUpForm() {
             setHasSentCode(true)
             setAuthCode("")
             setVerifiedEmail(null)
-            toast.add({ title: result.message || "인증번호를 발송했습니다." })
+            toast.add({ title: result.message || "인증번호를 발송했습니다.", type: "info" })
         } catch (error: unknown) {
-            toast.add({ title: getErrorMessage(error, "인증번호 발송에 실패했습니다.") })
+            toast.add({ title: getErrorMessage(error, "인증번호 발송에 실패했습니다."), type: "error" })
         } finally {
             setIsSendingCode(false)
         }
@@ -81,14 +81,14 @@ function SignUpForm() {
         try {
             const result = await verifyEmailCode(email.trim(), code)
             if (!result.verified) {
-                toast.add({ title: result.message || "인증번호를 확인해 주세요." })
+                toast.add({ title: result.message || "인증번호를 확인해 주세요.", type: "warning" })
                 return
             }
 
             setVerifiedEmail(email.trim())
-            toast.add({ title: result.message || "이메일 인증이 완료되었습니다." })
+            toast.add({ title: result.message || "이메일 인증이 완료되었습니다.", type: "success" })
         } catch (error: unknown) {
-            toast.add({ title: getErrorMessage(error, "인증번호 확인에 실패했습니다.") })
+            toast.add({ title: getErrorMessage(error, "인증번호 확인에 실패했습니다."), type: "error" })
         } finally {
             setIsVerifyingCode(false)
         }
@@ -129,6 +129,7 @@ function SignUpForm() {
         if (!canSubmit) {
             toast.add({
                 title: "입력 정보를 확인하고 필수 약관에 동의해 주세요.",
+                type: "warning",
             })
             return
         }
@@ -159,6 +160,7 @@ function SignUpForm() {
                     console.error("프로필 생성 실패:", error)
                     toast.add({
                         title: "회원가입과 로그인은 완료했지만 프로필 생성에 실패했습니다. 계정 페이지에서 다시 시도해 주세요.",
+                        type: "warning",
                     })
                     router.push("/me/account")
                     return
@@ -166,6 +168,7 @@ function SignUpForm() {
 
                 toast.add({
                     title: res.message || "회원가입과 프로필 생성이 완료되었습니다.",
+                    type: "success",
                 })
                 router.push("/")
             }
@@ -174,6 +177,7 @@ function SignUpForm() {
 
             toast.add({
                 title: error.response?.data?.message || error.message || "회원가입 중 오류가 발생했습니다.",
+                type: "error",
             })
         } finally {
             // 5. 성공하든 실패하든 로딩 상태 해제
