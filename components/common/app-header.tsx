@@ -28,8 +28,8 @@ function AppHeader() {
         <header className="flex min-h-8 w-full items-center justify-between">
             {/* 로고 영역 */}
             <div className="flex w-72 shrink-0 cursor-pointer items-center gap-2" onClick={() => router.push("/")}>
-                <Image src="/icons/earth.svg" alt="@LOGO" width={20} height={20} />
-                <span className={comicNeue.className + " text-xl"}>I'deaverse ✨</span>
+                <Image src="/icons/logo.svg" alt="@LOGO" width={20} height={20} />
+                <span className={comicNeue.className + " text-xl"}>ppoba dream 🤲🏻</span>
             </div>
 
             {!isAuthPage && (
