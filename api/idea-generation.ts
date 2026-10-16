@@ -39,6 +39,7 @@ export interface IdeaGenerationResponse {
 }
 
 const FOCUS_ITEM_MAX_LENGTH = "독창적인 음악 스타일과 개성을 살린 콘셉트 및 브랜딩 기획".length
+const SOLUTION_PIPELINE_TITLE_MAX_LENGTH = "프리 데뷔 믹스테이프 오픈 플랫폼 배포 및 반응 검".length
 
 export class IdeaGenerationApiError extends Error {
     constructor(
@@ -175,14 +176,20 @@ function parseSolutionMetric(value: unknown, field: string): BackendSolutionMetr
 
 function parsePipelineStep(value: unknown, index: number): BackendSolutionPipelineStep {
     const field = `solution.pipeline[${index}]`
+    const title = isRecord(value) ? value.title : undefined
     if (
         !isRecord(value) ||
         typeof value.order !== "number" ||
         !Number.isInteger(value.order) ||
         value.order !== index + 1 ||
+        typeof title !== "string" ||
+        title.trim().length === 0 ||
+        title.length > SOLUTION_PIPELINE_TITLE_MAX_LENGTH ||
         !Array.isArray(value.metrics)
     ) {
-        throw new IdeaGenerationApiError(`백엔드 구체화 응답의 ${field} 단계 순서 또는 형식이 올바르지 않습니다.`)
+        throw new IdeaGenerationApiError(
+            `백엔드 구체화 응답의 ${field} 단계 순서, 제목(${SOLUTION_PIPELINE_TITLE_MAX_LENGTH}자 이내) 또는 형식이 올바르지 않습니다.`
+        )
     }
 
     const painPointIds = parseStringArray(value.addresses_pain_point_ids, `${field}.addresses_pain_point_ids`)
@@ -194,7 +201,7 @@ function parsePipelineStep(value: unknown, index: number): BackendSolutionPipeli
         solution_step_id: requireString(value.solution_step_id, `${field}.solution_step_id`),
         order: value.order,
         category: requireString(value.category, `${field}.category`),
-        title: requireString(value.title, `${field}.title`),
+        title,
         subtitle: requireString(value.subtitle, `${field}.subtitle`),
         description: requireString(value.description, `${field}.description`),
         technology_label: requireString(value.technology_label, `${field}.technology_label`),

@@ -457,7 +457,7 @@ function AppContext() {
                         <ContextLayout label="구조화 포커스 레이어" icon={<ScanSearch size={16} />}>
                             {loadingSection === "focus" ? (
                                 <div aria-label="분석 포커스 준비 중" className="flex flex-wrap gap-1" role="status">
-                                    {Array.from({ length: 5 }, (_, index) => (
+                                    {Array.from({ length: 3 }, (_, index) => (
                                         <Skeleton key={index} className="h-5 w-20" />
                                     ))}
                                 </div>
