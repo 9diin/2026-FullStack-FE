@@ -517,7 +517,7 @@ export async function createIdeaElaboration(
         const response = await httpClient.post<unknown>(
             `/api/v1/idea-generations/${encodeURIComponent(generationId)}/elaboration`,
             request,
-            { timeout: 30_000 }
+            { timeout: 120_000 }
         )
         return validateElaborationIdentity(parseElaborationResponse(response.data), generationId, request.selected_idea_id)
     } catch (error) {
@@ -536,7 +536,7 @@ export async function getIdeaElaboration(
     try {
         const response = await httpClient.get<unknown>(
             `/api/v1/idea-generations/${encodeURIComponent(generationId)}/elaboration`,
-            { timeout: 30_000 }
+            { timeout: 120_000 }
         )
         return validateElaborationIdentity(parseElaborationResponse(response.data), generationId)
     } catch (error) {
