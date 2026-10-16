@@ -27,8 +27,6 @@ function SignInForm() {
         try {
             const res = await signIn({ email, password })
 
-            console.log(res)
-
             // [Zustand]와 [로컬 스토리지] 사용에 대한 가이드라인
 
             // 1. 로그인 토큰(열쇠)는 어디에 보관해야 할까요? (로컬 스토리지 vs 쿠키)
@@ -84,36 +82,18 @@ function SignInForm() {
             // - UI 상태 동기화 (클라이언트 측): 서버 컴포넌트가 쿠키를 기반으로 초기 인증 여부를 판단해 기본적인 레이아웃을 잡고,
             //   로그인 이후의 세부적인 사용자 정보 및 브라우저 내 인터랙션 상태는 Zustand를 통해 클라이언트 컴포넌트 간에 공유합니다.
 
-            console.log("로그인 성공 응답:", res)
-
-            // 백엔드 API 응답 구조에 맞춰 성공 상태 코드 확인 (일반적으로 200 또는 201)
-            if (res.status === 200 || res.status === 201) {
-                // [가이드라인 3번 반영]
-                // 토큰은 백엔드가 HttpOnly 쿠키로 설정해주었다고 가정하고,
-                // 브라우저 UI 동기화(예: 유저 이름 표시)를 위해 필요한 유저 정보만 Zustand 스토어에 반영합니다.
-                // setUser(res.data.user)
-
-                const { access_token, user } = res // 백엔드가 넘겨준 토큰과 유저 정보 구조라 가정
-                // [보안/미들웨어용] 토큰을 쿠키에 저장
-                // 만약 백엔드가 쿠키를 자동으로 심어주지 않는다면, 프론트엔드에서 아래와 같이 쿠키에 저장합니다.
-                // (실무에서는 백엔드가 Set-Cookie로 HttpOnly 쿠키를 내려주는 것이 가장 안전합니다.)
-                saveAccessTokenCookie(access_token)
-
-                // 만약 'js-cookie'를 쓴다면:
-                // Cookies.set("access_token", access_token, { expires: 1, secure: true, sameSite: "strict" })
-
-                // 2. [UI 동기화용] 유저 정보를 Zustand 스토어에 저장
-                setUser(user) 
-
-                toast.add({
-                    title: res.message || "로그인에 성공했습니다.",
-                    type: "success",
-                })
-
-                // 3. 페이지 이동 및 서버 컴포넌트 갱신
-                router.push("/")
-                router.refresh()
+            saveAccessTokenCookie(res.access_token)
+            if (res.user) {
+                setUser(res.user)
             }
+
+            toast.add({
+                title: res.message || "로그인에 성공했습니다.",
+                type: "success",
+            })
+
+            router.push("/")
+            router.refresh()
         } catch (error: any) {
             console.error("로그인 실패:", error)
 

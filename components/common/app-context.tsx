@@ -20,7 +20,18 @@ import {
 import { toast } from "@/components/ui/toast"
 import { ArrowUpRight, Brain, Check, File, Paperclip, ScanSearch, Sprout } from "lucide-react"
 import { useWorkspaceStore } from "@/store/workspace"
-import type { ProblemSectionData } from "@/types/idea-detail"
+import type {
+    BackendPainPointStep,
+    BackendSolutionComparisonColumn,
+    BackendSolutionMetric,
+    BackendSolutionPipelineStep,
+    ElaborationResponse,
+    IdeaElaborationData,
+    PainPointCycleStep,
+    SolutionComparisonColumn,
+    SolutionMetric,
+    SolutionPipelineStep,
+} from "@/types/idea-detail"
 import { ContextLayout } from "../main"
 import {
     createIdeaElaboration,
@@ -69,6 +80,101 @@ function getFileType(filename: string, mediaType: string): string {
     return extension && extension !== filename ? extension.toUpperCase() : (mediaType.split("/").at(-1)?.toUpperCase() ?? "FILE")
 }
 
+function mapSolutionMetric(metric: BackendSolutionMetric): SolutionMetric {
+    return {
+        label: metric.label,
+        value: metric.value,
+        unit: metric.unit,
+        status: metric.status,
+        basis: metric.basis,
+        evidenceIds: metric.evidence_ids,
+    }
+}
+
+function mapComparisonColumn(column: BackendSolutionComparisonColumn): SolutionComparisonColumn {
+    const mapItem = (item: BackendSolutionComparisonColumn["items"][number]) => ({
+        itemId: item.item_id,
+        text: item.text,
+        painPointIds: item.pain_point_ids,
+        solutionStepIds: item.solution_step_ids ?? [],
+    })
+
+    return {
+        label: column.label,
+        metrics: column.metrics.map(mapSolutionMetric),
+        items: [mapItem(column.items[0]), mapItem(column.items[1]), mapItem(column.items[2])],
+    }
+}
+
+function mapPainPoint(item: BackendPainPointStep): PainPointCycleStep {
+    return {
+        painPointId: item.pain_point_id,
+        step: item.step,
+        stepName: item.step_name,
+        title: item.title,
+        description: item.description,
+        highlightTag: item.highlight_tag,
+    }
+}
+
+function mapPipelineStep(step: BackendSolutionPipelineStep): SolutionPipelineStep {
+    return {
+        solutionStepId: step.solution_step_id,
+        order: step.order,
+        category: step.category,
+        title: step.title,
+        subtitle: step.subtitle,
+        description: step.description,
+        technologyLabel: step.technology_label,
+        addressesPainPointIds: step.addresses_pain_point_ids,
+        metrics: step.metrics.map(mapSolutionMetric),
+    }
+}
+
+function mapElaborationResponse(response: ElaborationResponse): IdeaElaborationData {
+    const [firstPainPoint, secondPainPoint, thirdPainPoint] = response.pain_point_cycle
+    const [firstStep, secondStep, thirdStep, fourthStep] = response.solution.pipeline
+
+    return {
+        elaborationId: response.elaboration_id,
+        generationId: response.generation_id,
+        problem: {
+            ideaId: response.selected_idea_id,
+            title: response.title,
+            summary: response.summary,
+            persona: {
+                title: response.persona.title,
+                description: response.persona.description,
+                evidencePoints: response.persona.evidence_points,
+            },
+            painPointCycle: [mapPainPoint(firstPainPoint), mapPainPoint(secondPainPoint), mapPainPoint(thirdPainPoint)],
+            aiCoaching: {
+                solutionEvidence: response.ai_coaching.solution_evidence,
+                feedbackReview: response.ai_coaching.feedback_review,
+            },
+        },
+        solution: {
+            summary: response.solution.summary,
+            validation: {
+                status: response.solution.validation.status,
+                score: response.solution.validation.score,
+                label: response.solution.validation.label,
+                evidenceIds: response.solution.validation.evidence_ids,
+            },
+            pipeline: [
+                mapPipelineStep(firstStep),
+                mapPipelineStep(secondStep),
+                mapPipelineStep(thirdStep),
+                mapPipelineStep(fourthStep),
+            ],
+            comparison: {
+                asIs: mapComparisonColumn(response.solution.comparison.as_is),
+                toBe: mapComparisonColumn(response.solution.comparison.to_be),
+            },
+        },
+    }
+}
+
 function AppContext() {
     const [idea, setIdea] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -79,12 +185,16 @@ function AppContext() {
     const [sourceFiles, setSourceFiles] = useState<SourceFileReference[]>([])
     const [focusItems, setFocusItems] = useState<string[]>([])
     const [generationId, setGenerationId] = useState<string | null>(null)
+    const [generationPersisted, setGenerationPersisted] = useState(false)
     const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null)
     const [pendingSelectionId, setPendingSelectionId] = useState<string | null>(null)
-    const [confirmingIdea, setConfirmingIdea] = useState<IdeaSuggestion | null>(null)
+    const confirmingIdea = useWorkspaceStore((state) => state.confirmingIdea)
     const setActiveIdea = useWorkspaceStore((state) => state.setActiveIdea)
+    const setWorkspaceSuggestions = useWorkspaceStore((state) => state.setIdeaSuggestions)
+    const setIdeaGenerationPersisted = useWorkspaceStore((state) => state.setIdeaGenerationPersisted)
+    const setConfirmingIdea = useWorkspaceStore((state) => state.setConfirmingIdea)
+    const setWorkspaceIdeaError = useWorkspaceStore((state) => state.setIdeaGenerationError)
     const setElaborationPhase = useWorkspaceStore((state) => state.setElaborationPhase)
-    const setProblemDetail = useWorkspaceStore((state) => state.setProblemDetail)
     const startElaborationSequence = useWorkspaceStore((state) => state.startElaborationSequence)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const submissionLock = useRef(false)
@@ -152,54 +262,61 @@ function AppContext() {
         setActiveIdea(null)
         setElaborationPhase("idle")
         setSuggestions([])
+        setWorkspaceSuggestions([])
+        setIdeaGenerationPersisted(false)
+        setConfirmingIdea(null)
+        setWorkspaceIdeaError(null)
         setSelectedIdeaId(null)
         setGenerationId(null)
+        setGenerationPersisted(false)
         setFocusItems([])
+
+        const loadingTimers: ReturnType<typeof setTimeout>[] = []
 
         try {
             setLoadingSection("sources")
-            const generationResult = createIdeaGeneration(
+            loadingTimers.push(setTimeout(() => setLoadingSection("focus"), LOADING_STEP_DELAY_MS))
+            loadingTimers.push(setTimeout(() => setLoadingSection("ideas"), LOADING_STEP_DELAY_MS * 2))
+
+            const response = await createIdeaGeneration(
                 normalizedIdea,
                 attachedFiles.map((sourceFile) => sourceFile.id)
-            ).then(
-                (response) => ({ response }) as const,
-                (error: unknown) => ({ error }) as const
             )
-
-            await new Promise((resolve) => setTimeout(resolve, LOADING_STEP_DELAY_MS))
-
-            setLoadingSection("focus")
-            await new Promise((resolve) => setTimeout(resolve, LOADING_STEP_DELAY_MS))
-
-            setLoadingSection("ideas")
-            const [result] = await Promise.all([generationResult, new Promise((resolve) => setTimeout(resolve, LOADING_STEP_DELAY_MS))])
-            if ("error" in result) {
-                throw result.error
-            }
-
-            const response = result.response
             if (response.suggestions.length !== 3) {
                 throw new IdeaGenerationApiError("백엔드에서 아이디어 3개를 받지 못했습니다.")
             }
 
             setSuggestions(response.suggestions)
+            setWorkspaceSuggestions(response.suggestions)
+            setWorkspaceIdeaError(null)
             setSourceFiles(response.context.source_files)
             setFocusItems(response.context.focus_items)
             setGenerationId(response.generation_id)
+            setGenerationPersisted(response.persisted)
+            setIdeaGenerationPersisted(response.persisted)
             setIdea("")
             toast.add({
                 title: "아이디어 도출 완료",
-                description: "아이디어 카드를 클릭하여 [아이디어 구체화] 데이터를 확인해 보세요.",
+                description: response.persisted
+                    ? "아이디어 카드를 클릭하여 [아이디어 구체화] 데이터를 확인해 보세요."
+                    : "비로그인 결과는 현재 화면에서만 확인할 수 있습니다. 구체화하려면 로그인해 주세요.",
                 type: "success",
             })
         } catch (error) {
+            setWorkspaceSuggestions([])
+            const message =
+                error instanceof IdeaGenerationApiError
+                    ? error.message
+                    : "아이디어를 분석하지 못했습니다. 잠시 후 다시 시도해 주세요."
+            setWorkspaceIdeaError(message)
             console.error("아이디어 도출에 실패했습니다.", error)
             toast.add({
                 title: "아이디어 도출 실패",
-                description: error instanceof IdeaGenerationApiError ? error.message : "아이디어를 분석하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+                description: message,
                 type: "error",
             })
         } finally {
+            loadingTimers.forEach(clearTimeout)
             setLoadingSection(null)
             setIsSubmitting(false)
             submissionLock.current = false
@@ -207,6 +324,14 @@ function AppContext() {
     }
 
     const handleClickIdeaCard = (targetSuggestion: IdeaSuggestion) => {
+        if (!generationPersisted) {
+            toast.add({
+                title: "로그인 후 구체화할 수 있습니다",
+                description: "비로그인 상태에서는 아이디어 생성 결과만 확인할 수 있습니다.",
+                type: "info",
+            })
+            return
+        }
         setConfirmingIdea(targetSuggestion)
     }
 
@@ -222,6 +347,10 @@ function AppContext() {
         setPendingSelectionId(targetIdea.id)
 
         try {
+            if (!generationId) {
+                throw new IdeaGenerationApiError("아이디어 생성 정보를 찾을 수 없습니다. 아이디어를 다시 도출해 주세요.")
+            }
+
             setSelectedIdeaId(targetIdea.id)
             setActiveIdea(targetIdea.id, targetIdea.title)
 
@@ -232,95 +361,15 @@ function AppContext() {
                 type: "info",
             })
 
-            // 1. 선택한 아이디어의 특성에 맞는 맞춤형 fallback 데이터 생성
-            const ideaTitle = targetIdea.title
-            const detail1 = targetIdea.details[0] || "1인 가구 라이프스타일 분석"
-            const detail2 = targetIdea.details[1] || "실시간 데이터 기반 맞춤형 제안"
-            const detail3 = targetIdea.details[2] || "초소량 자동 연동 및 최적화"
-
-            const dynamicSummary = `본 과제는 "${ideaTitle}" 과제를 중심으로, 1인 가구의 불규칙한 식생활과 급증하는 자원 낭비 및 탐색 피로도 문제를 해결하는 지능형 솔루션입니다. 현대 1인 가구 및 직장인 환경에서는 비효율적인 유통 규격과 퇴근 후 시간 부족으로 인해 과도한 비축과 부패 폐기, 배달 음식 과의존이라는 구조적 악순환이 고착화되어 있습니다. 본 기술은 ${detail1} 및 ${detail2} 메커니즘을 통합하여 사용자의 잔여 자원을 실시간 구조화하고, ${detail3} 솔루션을 제공함으로써 자원 낭비 감축과 건강한 식생활 전환이라는 사회적·경제적 가치를 동시에 실현하는 것을 핵심 목표로 합니다.`
-
-            const fallbackProblemData: ProblemSectionData = {
-                ideaId: targetIdea.id,
-                title: ideaTitle,
-                summary: dynamicSummary,
-                persona: {
-                    title: "2030 1인 가구 직장인",
-                    description: `퇴근 후 피로도가 높으나 ${detail1} 및 비용 부담에 불만을 느끼는 2030 1인 가구 직장인`,
-                    evidencePoints: [
-                        "마트 묶음 채소 절반 이상 버려지는 낭비",
-                        "퇴근 후 피로에 냉장고 속 재고 망각 방치",
-                        "한 끼 2만 원 넘는 잦은 배달 식비 부담",
-                    ],
-                },
-                painPointCycle: [
-                    {
-                        step: "단계 ①",
-                        stepName: "강제구매",
-                        title: "대용량 번들 포장",
-                        description: `소포장 부재로 묶음 품목 비자발적 과대 구매 (${detail1})`,
-                        highlightTag: "비자발적 초과 비축 발생",
-                    },
-                    {
-                        step: "단계 ②",
-                        stepName: "방치망각",
-                        title: "냉장고 재고 망각",
-                        description: `보유 재고 파악 불가 및 탐색 피로로 장기 방치 (${detail2})`,
-                        highlightTag: "평균 방치 기간 11.4일",
-                    },
-                    {
-                        step: "단계 ③",
-                        stepName: "폐기손실",
-                        title: "음식물 쓰레기화",
-                        description: `부패 폐기로 가구당 월 4.8만원 직접 손실 및 고비용 회귀 (${detail3})`,
-                        highlightTag: "가구당 월 4.8만 원 손실",
-                    },
-                ],
-                aiCoaching: {
-                    solutionEvidence: `"${ideaTitle}" 아이디어는 ${detail1} 및 ${detail2} 방식을 통해 기존 대체재의 한계를 극복합니다. 실시간 데이터 인식과 자동 큐레이션 알고리즘을 결합하여 결손 부재료만을 초소량 보충하며, ${detail3} 프로세스로 악순환을 원천 차단합니다. 1차 클로즈드 베타 테스터 100인 실증 검증을 통해 인식 정확도 94.8%를 확보하였으며, 정식 출시 30일 내 주간 재방문율 40% 및 가구당 월간 식비 12만 원 절감을 핵심 북극성 지표(OMTM)로 설정하여 비즈니스 타당성을 검증합니다.`,
-                    feedbackReview: `"${ideaTitle}"에 기반한 3단계 악순환 차단 구조와 30일 내 재방문율 40% 목표 제시는 매우 우수합니다. 단, 비즈니스 모델(수익화)과의 직접 연계를 1문장 더 보강하면 합격 안정권(90점대) 진입이 예상됩니다.`,
-                },
-            }
-
-            // 2. 백엔드 비동기 통신 프로미스 (스켈레톤 10초 대기와 병렬 실행)
-            const fetchElaboratedDataPromise = (async (): Promise<ProblemSectionData> => {
-                if (generationId) {
-                    await selectGeneratedIdea(generationId, targetIdea.id)
-                    const response = await createIdeaElaboration(generationId, {
-                        selected_idea_id: targetIdea.id,
-                    })
-
-                    return {
-                        ideaId: response.selected_idea_id,
-                        title: response.title,
-                        summary: response.summary,
-                        persona: {
-                            title: response.persona.title,
-                            description: response.persona.description,
-                            evidencePoints: response.persona.evidence_points,
-                        },
-                        painPointCycle: response.pain_point_cycle.map((item) => ({
-                            step: item.step,
-                            stepName: item.step_name,
-                            title: item.title,
-                            description: item.description,
-                            highlightTag: item.highlight_tag,
-                        })) as [
-                            import("@/types/idea-detail").PainPointCycleStep,
-                            import("@/types/idea-detail").PainPointCycleStep,
-                            import("@/types/idea-detail").PainPointCycleStep,
-                        ],
-                        aiCoaching: {
-                            solutionEvidence: response.ai_coaching.solution_evidence,
-                            feedbackReview: response.ai_coaching.feedback_review,
-                        },
-                    }
-                }
-
-                return fallbackProblemData
+            const fetchElaboratedDataPromise = (async (): Promise<IdeaElaborationData> => {
+                await selectGeneratedIdea(generationId, targetIdea.id)
+                const response = await createIdeaElaboration(generationId, {
+                    selected_idea_id: targetIdea.id,
+                })
+                return mapElaborationResponse(response)
             })()
 
-            // 3. UI에 바인딩: 클릭 즉시 문제인식 스켈레톤 활성화 & 백엔드 통신과 10초 병렬 대기 시작!
+            // 선택한 아이디어의 문제인식과 해결방안을 같은 백엔드 구체화 응답으로 연결합니다.
             await startElaborationSequence(fetchElaboratedDataPromise)
             toast.add({
                 title: "아이디어 구체화 반영 완료",
@@ -397,7 +446,11 @@ function AppContext() {
                                 </div>
                             ) : (
                                 <div className="flex min-h-[92px] shrink-0 items-center justify-center rounded-sm border border-dashed border-border/70 px-3 text-center">
-                                    <p className="text-xs text-muted-foreground">참조할 파일이 없습니다. 파일을 첨부하면 여기에 표시됩니다.</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        참조할 파일이 없습니다.
+                                        <br />
+                                        파일을 첨부하면 여기에 표시됩니다.
+                                    </p>
                                 </div>
                             )}
                         </ContextLayout>
@@ -409,9 +462,12 @@ function AppContext() {
                                     ))}
                                 </div>
                             ) : focusItems.length > 0 ? (
-                                <div className="flex flex-wrap items-center gap-1">
+                                <div className="flex min-w-0 flex-wrap items-center gap-1">
                                     {focusItems.map((focusItem) => (
-                                        <Badge key={focusItem} className="bg-amber-900/30 text-[10px] text-amber-500">
+                                        <Badge
+                                            key={focusItem}
+                                            className="h-auto min-w-0 max-w-full whitespace-normal break-words bg-amber-900/30 py-1 text-left text-[10px] leading-4 text-amber-500"
+                                        >
                                             # {focusItem}
                                         </Badge>
                                     ))}
@@ -483,6 +539,14 @@ function AppContext() {
                                 </div>
                             ) : (
                                 <p className="text-xs text-muted-foreground">아이디어를 입력하고 도출 버튼을 눌러보세요.</p>
+                            )}
+                            {suggestions.length > 0 && !generationPersisted && (
+                                <p className="mt-2 text-xs text-muted-foreground">
+                                    비로그인 결과는 이 화면에서만 확인할 수 있습니다.{" "}
+                                    <a className="text-primary underline underline-offset-2" href="/sign-in">
+                                        로그인하고 구체화하기
+                                    </a>
+                                </p>
                             )}
                         </ContextLayout>
                     </>

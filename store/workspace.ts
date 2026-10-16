@@ -1,7 +1,13 @@
 import { create } from "zustand"
-import type { ProblemSectionData } from "@/types/idea-detail"
+import type { IdeaElaborationData, ProblemSectionData, SolutionSectionData } from "@/types/idea-detail"
 
 export type WorkspaceView = "idea" | "analytics"
+
+export interface WorkspaceIdeaSuggestion {
+    id: string
+    title: string
+    details: string[]
+}
 
 export const INITIAL_PROBLEM_DETAIL: ProblemSectionData = {
     ideaId: "idea-fridge-vision-01",
@@ -19,6 +25,7 @@ export const INITIAL_PROBLEM_DETAIL: ProblemSectionData = {
     },
     painPointCycle: [
         {
+            painPointId: "pp-overbuy",
             step: "단계 ①",
             stepName: "강제구매",
             title: "대용량 번들 포장",
@@ -26,6 +33,7 @@ export const INITIAL_PROBLEM_DETAIL: ProblemSectionData = {
             highlightTag: "비자발적 초과 비축 발생",
         },
         {
+            painPointId: "pp-forget",
             step: "단계 ②",
             stepName: "방치망각",
             title: "냉장고 재고 망각",
@@ -33,6 +41,7 @@ export const INITIAL_PROBLEM_DETAIL: ProblemSectionData = {
             highlightTag: "평균 방치 기간 11.4일",
         },
         {
+            painPointId: "pp-waste",
             step: "단계 ③",
             stepName: "폐기손실",
             title: "음식물 쓰레기화",
@@ -62,23 +71,42 @@ export type ElaborationPhase = "idle" | "problem" | "solution" | "scaleup" | "te
 interface WorkspaceStore {
     view: WorkspaceView
     setView: (view: WorkspaceView) => void
+    ideaSuggestions: WorkspaceIdeaSuggestion[]
+    setIdeaSuggestions: (suggestions: WorkspaceIdeaSuggestion[]) => void
+    ideaGenerationPersisted: boolean
+    setIdeaGenerationPersisted: (persisted: boolean) => void
+    confirmingIdea: WorkspaceIdeaSuggestion | null
+    setConfirmingIdea: (suggestion: WorkspaceIdeaSuggestion | null) => void
+    ideaGenerationError: string | null
+    setIdeaGenerationError: (message: string | null) => void
     activeIdeaId: string | null
     problemDetail: ProblemSectionData
+    solutionDetail: SolutionSectionData | null
     setActiveIdea: (ideaId: string | null, title?: string) => void
     setProblemDetail: (detail: ProblemSectionData) => void
     elaborationPhase: ElaborationPhase
     setElaborationPhase: (phase: ElaborationPhase) => void
-    startElaborationSequence: (detail: Promise<ProblemSectionData> | ProblemSectionData) => Promise<void>
+    startElaborationSequence: (detail: Promise<IdeaElaborationData> | IdeaElaborationData) => Promise<void>
 }
 
 export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
     view: "idea",
     setView: (view) => set({ view }),
+    ideaSuggestions: [],
+    setIdeaSuggestions: (ideaSuggestions) => set({ ideaSuggestions }),
+    ideaGenerationPersisted: false,
+    setIdeaGenerationPersisted: (ideaGenerationPersisted) => set({ ideaGenerationPersisted }),
+    confirmingIdea: null,
+    setConfirmingIdea: (confirmingIdea) => set({ confirmingIdea }),
+    ideaGenerationError: null,
+    setIdeaGenerationError: (ideaGenerationError) => set({ ideaGenerationError }),
     activeIdeaId: null,
     problemDetail: INITIAL_PROBLEM_DETAIL,
+    solutionDetail: null,
     setActiveIdea: (ideaId, title) =>
         set((state) => ({
             activeIdeaId: ideaId,
+            solutionDetail: null,
             ...(ideaId && {
                 problemDetail: {
                     ...state.problemDetail,
@@ -87,29 +115,29 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
                 },
             }),
         })),
-    setProblemDetail: (detail) => set({ problemDetail: detail, activeIdeaId: detail.ideaId }),
+    setProblemDetail: (detail) => set({ problemDetail: detail, solutionDetail: null, activeIdeaId: detail.ideaId }),
     elaborationPhase: "idle",
     setElaborationPhase: (phase) => set({ elaborationPhase: phase }),
-    startElaborationSequence: async (detailPromise: Promise<ProblemSectionData> | ProblemSectionData) => {
+    startElaborationSequence: async (detailPromise: Promise<IdeaElaborationData> | IdeaElaborationData) => {
         // 1단계: 클릭 즉시 문제인식 스켈레톤 & 분석 상태로 즉각 전환 (최소 10초 유지 & 백엔드 통신 병렬 실행)
-        set({ elaborationPhase: "problem" })
+        set({ elaborationPhase: "problem", solutionDetail: null })
 
         try {
-            const [detail] = await Promise.all([
+            const [elaboration] = await Promise.all([
                 Promise.resolve(detailPromise),
                 new Promise((resolve) => setTimeout(resolve, 10000)),
             ])
 
             // 2단계: 문제인식 완료 데이터 바인딩 -> 솔루션 생성 중 (10초)
             set({
-                problemDetail: detail,
-                activeIdeaId: detail.ideaId,
+                problemDetail: elaboration.problem,
+                activeIdeaId: elaboration.problem.ideaId,
                 elaborationPhase: "solution",
             })
             await new Promise((resolve) => setTimeout(resolve, 10000))
 
             // 3단계: 솔루션 완료 -> 성장전략 생성 중 (10초)
-            set({ elaborationPhase: "scaleup" })
+            set({ solutionDetail: elaboration.solution, elaborationPhase: "scaleup" })
             await new Promise((resolve) => setTimeout(resolve, 10000))
 
             // 4단계: 성장전략 완료 -> 팀 빌딩 생성 중 (10초)
@@ -119,8 +147,12 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
             // 5단계: 팀 빌딩 및 전체 완료
             set({ elaborationPhase: "done" })
         } catch (error) {
-            // 통신 실패 시 idle 상태로 롤백
-            set({ elaborationPhase: "idle" })
+            set({
+                activeIdeaId: null,
+                problemDetail: INITIAL_PROBLEM_DETAIL,
+                solutionDetail: null,
+                elaborationPhase: "idle",
+            })
             throw error
         }
     },

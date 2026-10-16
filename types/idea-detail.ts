@@ -5,6 +5,7 @@ export interface TargetPersona {
 }
 
 export interface PainPointCycleStep {
+    painPointId: string
     step: string // "단계 ①"
     stepName: string // "강제구매"
     title: string // "대용량 번들 포장"
@@ -24,8 +25,70 @@ export interface ProblemSectionData {
     }
 }
 
+export type SolutionMetricStatus = "measured" | "target" | "estimate" | "unknown"
+
+export interface SolutionMetric {
+    label: string
+    value: number | null
+    unit: string
+    status: SolutionMetricStatus
+    basis: string | null
+    evidenceIds: string[]
+}
+
+export interface SolutionValidation {
+    status: SolutionMetricStatus
+    score: number | null
+    label: string
+    evidenceIds: string[]
+}
+
+export interface SolutionPipelineStep {
+    solutionStepId: string
+    order: number
+    category: string
+    title: string
+    subtitle: string
+    description: string
+    technologyLabel: string
+    addressesPainPointIds: string[]
+    metrics: SolutionMetric[]
+}
+
+export interface SolutionComparisonItem {
+    itemId: string
+    text: string
+    painPointIds: string[]
+    solutionStepIds: string[]
+}
+
+export interface SolutionComparisonColumn {
+    label: string
+    metrics: SolutionMetric[]
+    items: [SolutionComparisonItem, SolutionComparisonItem, SolutionComparisonItem]
+}
+
+export interface SolutionSectionData {
+    summary: string
+    validation: SolutionValidation
+    pipeline: [SolutionPipelineStep, SolutionPipelineStep, SolutionPipelineStep, SolutionPipelineStep]
+    comparison: {
+        asIs: SolutionComparisonColumn
+        toBe: SolutionComparisonColumn
+    }
+}
+
+export interface IdeaElaborationData {
+    elaborationId: string
+    generationId: string
+    problem: ProblemSectionData
+    solution: SolutionSectionData
+}
+
 // 백엔드 FastAPI DTO
 export interface BackendPainPointStep {
+    pain_point_id: string
+    order: number
     step: string
     step_name: string
     title: string
@@ -42,6 +105,62 @@ export interface BackendTargetPersona {
 export interface BackendAICoaching {
     solution_evidence: string
     feedback_review: string
+}
+
+export interface BackendSolutionMetric {
+    label: string
+    value: number | null
+    unit: string
+    status: SolutionMetricStatus
+    basis: string | null
+    evidence_ids: string[]
+}
+
+export interface BackendSolutionValidation {
+    status: SolutionMetricStatus
+    score: number | null
+    label: string
+    evidence_ids: string[]
+}
+
+export interface BackendSolutionPipelineStep {
+    solution_step_id: string
+    order: number
+    category: string
+    title: string
+    subtitle: string
+    description: string
+    technology_label: string
+    addresses_pain_point_ids: string[]
+    metrics: BackendSolutionMetric[]
+}
+
+export interface BackendSolutionComparisonItem {
+    item_id: string
+    text: string
+    pain_point_ids: string[]
+    solution_step_ids: string[]
+}
+
+export interface BackendSolutionComparisonColumn {
+    label: string
+    metrics: BackendSolutionMetric[]
+    items: [BackendSolutionComparisonItem, BackendSolutionComparisonItem, BackendSolutionComparisonItem]
+}
+
+export interface BackendSolutionSection {
+    summary: string
+    validation: BackendSolutionValidation
+    pipeline: [
+        BackendSolutionPipelineStep,
+        BackendSolutionPipelineStep,
+        BackendSolutionPipelineStep,
+        BackendSolutionPipelineStep,
+    ]
+    comparison: {
+        as_is: BackendSolutionComparisonColumn
+        to_be: BackendSolutionComparisonColumn
+    }
 }
 
 export interface ElaborationRequest {
@@ -62,6 +181,6 @@ export interface ElaborationResponse {
     persona: BackendTargetPersona
     pain_point_cycle: [BackendPainPointStep, BackendPainPointStep, BackendPainPointStep]
     ai_coaching: BackendAICoaching
+    solution: BackendSolutionSection
     created_at: string
 }
-

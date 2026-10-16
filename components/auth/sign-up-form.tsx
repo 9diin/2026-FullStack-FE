@@ -144,34 +144,28 @@ function SignUpForm() {
                 marketing_agreed: marketingAgreed,
             })
 
-            if (res.status === 201) {
-                const loginResponse = await signIn({ email: email.trim(), password })
-                if (typeof loginResponse.access_token !== "string" || !loginResponse.access_token) {
-                    throw new Error("로그인 토큰을 확인할 수 없습니다.")
-                }
-
-                saveAccessTokenCookie(loginResponse.access_token)
-                if (loginResponse.user) {
-                    setUser(loginResponse.user)
-                }
-                try {
-                    await createSignupUserProfile()
-                } catch (error: unknown) {
-                    console.error("프로필 생성 실패:", error)
-                    toast.add({
-                        title: "회원가입과 로그인은 완료했지만 프로필 생성에 실패했습니다. 계정 페이지에서 다시 시도해 주세요.",
-                        type: "warning",
-                    })
-                    router.push("/me/account")
-                    return
-                }
-
-                toast.add({
-                    title: res.message || "회원가입과 프로필 생성이 완료되었습니다.",
-                    type: "success",
-                })
-                router.push("/")
+            const loginResponse = await signIn({ email: email.trim(), password })
+            saveAccessTokenCookie(loginResponse.access_token)
+            if (loginResponse.user) {
+                setUser(loginResponse.user)
             }
+            try {
+                await createSignupUserProfile()
+            } catch (error: unknown) {
+                console.error("프로필 생성 실패:", error)
+                toast.add({
+                    title: "회원가입과 로그인은 완료했지만 프로필 생성에 실패했습니다. 계정 페이지에서 다시 시도해 주세요.",
+                    type: "warning",
+                })
+                router.push("/me/account")
+                return
+            }
+
+            toast.add({
+                title: res.message || "회원가입과 프로필 생성이 완료되었습니다.",
+                type: "success",
+            })
+            router.push("/")
         } catch (error: any) {
             console.error("회원가입 실패:", error)
 

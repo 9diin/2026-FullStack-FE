@@ -1,3 +1,4 @@
+import { Fragment } from "react"
 import { Badge, Card, Separator } from "@/components/ui"
 import { Bot, ChevronRight, CircleArrowRight, CornerDownRight } from "lucide-react"
 
@@ -42,10 +43,10 @@ function ProblemLayout() {
             </Card>
             <div className="flex flex-col gap-2">
                 <span className="font-semibold">&#8251; 검증된 3대 페인포인트 악순환 고리</span>
-                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] items-stretch gap-2">
                     {problemDetail.painPointCycle.map((step, idx) => (
-                        <div key={step.step} className="flex flex-1 items-center gap-2">
-                            <Card className="w-full gap-0 bg-muted/30 p-4">
+                        <Fragment key={step.step}>
+                            <Card className="min-w-0 gap-0 bg-muted/30 p-4">
                                 <span className="text-xs text-neutral-400">{step.step} &middot; {step.stepName}</span>
                                 <span className={`text-base font-semibold ${idx === 2 ? "text-rose-400" : ""}`}>
                                     {step.title}
@@ -58,9 +59,9 @@ function ProblemLayout() {
                                 </span>
                             </Card>
                             {idx < problemDetail.painPointCycle.length - 1 && (
-                                <CircleArrowRight className="min-w-4.5 shrink-0 text-neutral-400" />
+                                <CircleArrowRight className="min-w-4.5 shrink-0 self-center text-neutral-400" />
                             )}
-                        </div>
+                        </Fragment>
                     ))}
                 </div>
             </div>

@@ -15,6 +15,7 @@ import {
 } from "@/components/main"
 import { BusinessPlanReport } from "@/components/report"
 import { Badge, Card, Separator } from "@/components/ui"
+import { toast } from "@/components/ui/toast"
 import { ArrowRight, Check, ChevronRight, CircleAlert, TrendingUp } from "lucide-react"
 import { useWorkspaceStore } from "@/store/workspace"
 import type { ElaborationPhase } from "@/store/workspace"
@@ -29,6 +30,10 @@ function isPastPhase(current: ElaborationPhase, target: ElaborationPhase): boole
 // ⭐️ 화면 명세서 => 기능 명세서 => 화면 설계서 => 컴포넌트 설계서 => 컴포넌트 구현
 function Home() {
     const workspaceView = useWorkspaceStore((state) => state.view)
+    const ideaSuggestions = useWorkspaceStore((state) => state.ideaSuggestions)
+    const ideaGenerationPersisted = useWorkspaceStore((state) => state.ideaGenerationPersisted)
+    const setConfirmingIdea = useWorkspaceStore((state) => state.setConfirmingIdea)
+    const ideaGenerationError = useWorkspaceStore((state) => state.ideaGenerationError)
     const activeIdeaId = useWorkspaceStore((state) => state.activeIdeaId)
     const problemDetail = useWorkspaceStore((state) => state.problemDetail)
     const elaborationPhase = useWorkspaceStore((state) => state.elaborationPhase)
@@ -302,6 +307,57 @@ function Home() {
                                                 </div>
                                             </div>
                                         </Card>
+                                    </div>
+                                </div>
+                            ) : ideaGenerationError ? (
+                                <div className="flex min-h-full w-full max-w-xl flex-1 flex-col items-center justify-center gap-3 text-center">
+                                    <CircleAlert aria-hidden="true" className="size-8 text-amber-400" />
+                                    <h2 className="text-lg font-semibold">추천 아이디어를 표시할 수 없습니다</h2>
+                                    <p className="text-sm leading-relaxed text-muted-foreground">{ideaGenerationError}</p>
+                                </div>
+                            ) : ideaSuggestions.length > 0 ? (
+                                <div className="flex min-h-full w-full max-w-7xl flex-1 flex-col justify-center gap-5 py-4">
+                                    <div>
+                                        <span className="text-xs font-semibold tracking-widest text-violet-400 uppercase">AI recommendations</span>
+                                        <h2 className="mt-1 text-2xl font-bold">추천 아이디어 3개</h2>
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            아이디어 카드를 선택하고 구체화 버튼을 눌러 문제인식과 해결방안을 생성할 수 있습니다.
+                                        </p>
+                                    </div>
+                                    <div className="grid gap-4 lg:grid-cols-3">
+                                        {ideaSuggestions.map((suggestion, index) => (
+                                            <Card key={suggestion.id} className="h-full p-0 transition-colors hover:border-violet-500/50 hover:bg-muted/20">
+                                                <button
+                                                    type="button"
+                                                    className="flex h-full w-full cursor-pointer flex-col gap-3 rounded-xl p-4 text-left focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:outline-none"
+                                                    aria-label={`추천 아이디어 ${index + 1}: ${suggestion.title} 구체화 선택`}
+                                                    onClick={() => {
+                                                        if (!ideaGenerationPersisted) {
+                                                            toast.add({
+                                                                title: "로그인 후 구체화할 수 있습니다",
+                                                                description: "비로그인 상태에서는 아이디어 생성 결과만 확인할 수 있습니다.",
+                                                                type: "info",
+                                                            })
+                                                            return
+                                                        }
+                                                        setConfirmingIdea(suggestion)
+                                                    }}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge variant="secondary">추천 아이디어 {index + 1}</Badge>
+                                                    </div>
+                                                    <h3 className="text-base leading-relaxed font-semibold">{suggestion.title}</h3>
+                                                    <ul className="flex flex-col gap-2 border-t border-border/60 pt-3">
+                                                        {suggestion.details.map((detail, detailIndex) => (
+                                                            <li key={`${suggestion.id}-${detailIndex}`} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                                                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-violet-400" />
+                                                                <span className="leading-relaxed">{detail}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </button>
+                                            </Card>
+                                        ))}
                                     </div>
                                 </div>
                             ) : (

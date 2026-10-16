@@ -1,3 +1,4 @@
+import { Fragment } from "react"
 import { Card, Separator, Skeleton } from "@/components/ui"
 
 /**
@@ -45,10 +46,10 @@ export function ProblemSkeleton() {
             {/* 검증된 3대 페인포인트 악순환 고리 */}
             <div className="flex flex-col gap-2">
                 <Skeleton className="h-5 w-60" />
-                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] items-stretch gap-2">
                     {[0, 1, 2].map((i) => (
-                        <div key={i} className="flex flex-1 items-center gap-2">
-                            <Card className="w-full gap-0 bg-muted/30 p-4">
+                        <Fragment key={i}>
+                            <Card className="min-w-0 gap-0 bg-muted/30 p-4">
                                 <Skeleton className="h-3.5 w-20" />
                                 <Skeleton className="mt-1 h-5 w-28" />
                                 <div className="mt-2 flex h-[5.625rem] flex-col justify-between py-0.5">
@@ -60,8 +61,8 @@ export function ProblemSkeleton() {
                                 </div>
                                 <Skeleton className="mt-2 h-3.5 w-28" />
                             </Card>
-                            {i < 2 && <Skeleton className="h-4.5 w-4.5 shrink-0 rounded-full" />}
-                        </div>
+                            {i < 2 && <Skeleton className="h-4.5 w-4.5 shrink-0 self-center rounded-full" />}
+                        </Fragment>
                     ))}
                 </div>
             </div>
@@ -155,11 +156,11 @@ export function SolutionSkeleton() {
             {/* AS-IS vs TO-BE 정밀 비교 그리드 */}
             <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-stretch gap-4">
                 <Card className="h-full min-w-0 flex-1 gap-2 border border-rose-400/30 p-3">
-                    <div className="flex w-full items-center justify-between">
+                    <div className="flex w-full flex-wrap items-start justify-between gap-2">
                         <Skeleton className="h-5 w-14 rounded-sm" />
                         <Skeleton className="h-3.5 w-20" />
                     </div>
-                    <div className="grid grid-rows-3 gap-2">
+                    <div className="flex flex-col gap-3">
                         {[0, 1, 2].map((i) => (
                             <div key={i} className="flex items-start gap-1.5">
                                 <Skeleton className="mt-0.5 h-4.5 w-4.5 shrink-0" />
@@ -175,11 +176,11 @@ export function SolutionSkeleton() {
                     <Skeleton className="h-6 w-6 rounded-sm" />
                 </div>
                 <Card className="h-full min-w-0 flex-1 gap-2 border border-emerald-400/30 p-3">
-                    <div className="flex w-full items-center justify-between">
+                    <div className="flex w-full flex-wrap items-start justify-between gap-2">
                         <Skeleton className="h-5 w-14 rounded-sm" />
                         <Skeleton className="h-3.5 w-20" />
                     </div>
-                    <div className="grid grid-rows-3 gap-2">
+                    <div className="flex flex-col gap-3">
                         {[0, 1, 2].map((i) => (
                             <div key={i} className="flex items-start gap-1.5">
                                 <Skeleton className="mt-0.5 h-4.5 w-4.5 shrink-0" />

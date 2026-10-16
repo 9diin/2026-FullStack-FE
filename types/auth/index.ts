@@ -12,5 +12,19 @@ export interface SignInRequest {
     password: string
 }
 
-// 회원가입 성공 응답 타입
-export interface SignUpResponse {}
+export interface SignInUser {
+    id: number
+    email: string
+    name: string
+    avatar: string
+}
+
+export interface SignInResponse {
+    access_token: string
+    user?: SignInUser
+    message?: string
+}
+
+export interface SignUpResponse {
+    message?: string
+}
